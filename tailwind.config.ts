@@ -50,6 +50,8 @@ export default {
         // Custom anime theme colors
         'anime-pink': "hsl(var(--glow-pink))",
         'anime-purple': "hsl(var(--glow-purple))",
+        'glow-blue': "hsl(var(--glow-blue))",
+        'glow-cyan': "hsl(var(--glow-cyan))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

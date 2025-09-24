@@ -14,6 +14,12 @@ import GenrePage from "./pages/GenrePage";
 import AnimeDetails from "./pages/AnimeDetails";
 import WatchPage from "./pages/WatchPage";
 import NotFound from "./pages/NotFound";
+import AZList from "./pages/AZList";
+import SearchPage from "./pages/SearchPage";
+import Contact from "./pages/Contact";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
+import Trending from "./pages/Trending";
 
 const queryClient = new QueryClient();
 
@@ -34,7 +40,12 @@ const App = () => (
             <Route path="/genre/:genreName" element={<GenrePage />} />
             <Route path="/anime/:id" element={<AnimeDetails />} />
             <Route path="/watch/:id" element={<WatchPage />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="/az-list" element={<AZList />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/trending" element={<Trending />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>

@@ -2,62 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Anime streaming website design system with dark theme and vibrant accents
+/* AnimixPlay clone design system with dark blue theme
 All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    /* Dark anime theme backgrounds */
-    --background: 260 15% 8%;
-    --foreground: 0 0% 98%;
+    /* Dark AnimixPlay theme - dark blue backgrounds */
+    --background: 220 30% 6%;
+    --foreground: 0 0% 95%;
 
-    /* Card backgrounds with subtle purple tint */
-    --card: 260 15% 12%;
-    --card-foreground: 0 0% 95%;
+    /* Card backgrounds with blue tint */
+    --card: 220 25% 10%;
+    --card-foreground: 0 0% 92%;
 
     /* Popover styling */
-    --popover: 260 15% 10%;
+    --popover: 220 30% 8%;
     --popover-foreground: 0 0% 95%;
 
-    /* Vibrant pink primary (anime accent) */
-    --primary: 335 85% 70%;
-    --primary-foreground: 0 0% 10%;
+    /* Blue primary (AnimixPlay accent) */
+    --primary: 210 100% 60%;
+    --primary-foreground: 0 0% 98%;
 
-    /* Purple secondary */
-    --secondary: 260 20% 18%;
-    --secondary-foreground: 0 0% 90%;
+    /* Darker blue secondary */
+    --secondary: 220 25% 14%;
+    --secondary-foreground: 0 0% 85%;
 
     /* Muted elements */
-    --muted: 260 15% 15%;
-    --muted-foreground: 0 0% 65%;
+    --muted: 220 20% 12%;
+    --muted-foreground: 0 0% 60%;
 
-    /* Purple accent */
-    --accent: 270 50% 25%;
+    /* Blue accent */
+    --accent: 215 80% 30%;
     --accent-foreground: 0 0% 95%;
 
     /* Destructive red */
     --destructive: 0 70% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    /* Borders and inputs with purple tint */
-    --border: 260 20% 20%;
-    --input: 260 15% 15%;
-    --ring: 335 85% 70%;
+    /* Borders and inputs with blue tint */
+    --border: 220 25% 18%;
+    --input: 220 20% 12%;
+    --ring: 210 100% 60%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
 
-    /* Custom anime theme colors */
-    --anime-gradient: linear-gradient(135deg, hsl(335 85% 70%), hsl(270 80% 60%));
-    --hero-gradient: linear-gradient(45deg, hsl(260 15% 8%), hsl(270 25% 15%));
-    --card-gradient: linear-gradient(135deg, hsl(260 15% 12%), hsl(270 20% 16%));
-    --glow-pink: 335 85% 70%;
-    --glow-purple: 270 80% 60%;
+    /* Custom AnimixPlay theme colors */
+    --animix-gradient: linear-gradient(135deg, hsl(210 100% 60%), hsl(220 80% 50%));
+    --hero-gradient: linear-gradient(45deg, hsl(220 30% 6%), hsl(215 25% 10%));
+    --card-gradient: linear-gradient(135deg, hsl(220 25% 10%), hsl(215 20% 14%));
+    --glow-blue: 210 100% 60%;
+    --glow-cyan: 190 100% 50%;
     
-    /* Shadows with anime theme */
-    --shadow-glow: 0 0 30px hsl(var(--glow-pink) / 0.3);
-    --shadow-card: 0 10px 25px hsl(260 15% 5% / 0.5);
-    --shadow-hero: 0 20px 40px hsl(260 15% 3% / 0.7);
+    /* Shadows with AnimixPlay theme */
+    --shadow-glow: 0 0 30px hsl(var(--glow-blue) / 0.4);
+    --shadow-card: 0 8px 20px hsl(220 30% 3% / 0.6);
+    --shadow-hero: 0 20px 40px hsl(220 30% 2% / 0.8);
 
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -81,34 +81,34 @@ All colors MUST be HSL.
   }
 
   .dark {
-    /* Even darker theme for true dark mode */
-    --background: 260 20% 4%;
+    /* Even darker AnimixPlay theme */
+    --background: 220 35% 4%;
     --foreground: 0 0% 98%;
 
-    --card: 260 20% 8%;
+    --card: 220 30% 7%;
     --card-foreground: 0 0% 95%;
 
-    --popover: 260 20% 6%;
+    --popover: 220 35% 5%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 335 90% 75%;
-    --primary-foreground: 0 0% 10%;
+    --primary: 210 100% 65%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 260 25% 15%;
+    --secondary: 220 30% 12%;
     --secondary-foreground: 0 0% 90%;
 
-    --muted: 260 20% 12%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 220 25% 10%;
+    --muted-foreground: 0 0% 55%;
 
-    --accent: 270 55% 20%;
+    --accent: 215 85% 25%;
     --accent-foreground: 0 0% 95%;
 
     --destructive: 0 75% 65%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 260 25% 15%;
-    --input: 260 20% 12%;
-    --ring: 335 90% 75%;
+    --border: 220 30% 13%;
+    --input: 220 25% 10%;
+    --ring: 210 100% 65%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -151,7 +151,7 @@ All colors MUST be HSL.
 }
 
 @layer components {
-  /* Anime card component styles */
+  /* AnimixPlay card component styles */
   .anime-card {
     background: var(--card-gradient);
     border: 1px solid hsl(var(--border));
@@ -161,18 +161,18 @@ All colors MUST be HSL.
   }
 
   .anime-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
     box-shadow: var(--shadow-glow);
-    border-color: hsl(var(--primary) / 0.5);
+    border-color: hsl(var(--primary) / 0.6);
   }
 
-  /* Glow effects for anime theme */
+  /* Glow effects for AnimixPlay theme */
   .glow-effect {
-    box-shadow: 0 0 20px hsl(var(--glow-pink) / 0.4);
+    box-shadow: 0 0 25px hsl(var(--glow-blue) / 0.5);
   }
 
   .text-glow {
-    text-shadow: 0 0 10px hsl(var(--glow-pink) / 0.6);
+    text-shadow: 0 0 12px hsl(var(--glow-blue) / 0.7);
   }
 
   /* Hero section styling */
@@ -180,7 +180,14 @@ All colors MUST be HSL.
     background: var(--hero-gradient);
   }
 
-  .anime-gradient {
-    background: var(--anime-gradient);
+  .animix-gradient {
+    background: var(--animix-gradient);
+  }
+
+  /* Bottom navigation styling */
+  .bottom-nav {
+    backdrop-filter: blur(12px);
+    background: hsl(var(--card) / 0.9);
+    border-top: 1px solid hsl(var(--border));
   }
 }
