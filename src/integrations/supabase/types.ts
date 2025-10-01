@@ -14,7 +14,106 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      favorites: {
+        Row: {
+          anime_id: string
+          anime_image: string | null
+          anime_title: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          anime_id: string
+          anime_image?: string | null
+          anime_title: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          anime_id?: string
+          anime_image?: string | null
+          anime_title?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          id: string
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      watchlist: {
+        Row: {
+          anime_id: string
+          anime_image: string | null
+          anime_title: string
+          created_at: string | null
+          id: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          anime_id: string
+          anime_image?: string | null
+          anime_title: string
+          created_at?: string | null
+          id?: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          anime_id?: string
+          anime_image?: string | null
+          anime_title?: string
+          created_at?: string | null
+          id?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "watchlist_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

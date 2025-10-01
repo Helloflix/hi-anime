@@ -9,7 +9,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
 
@@ -40,14 +39,14 @@ export function AppSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-r border-border/40">
       <SidebarContent className="bg-card/50 backdrop-blur-sm">
-        {/* Logo Section */}
-        <div className="flex items-center gap-2 px-4 py-6 border-b border-border/40">
-          <div className="flex items-center justify-center w-10 h-10 rounded-lg animix-gradient">
-            <Play className="h-6 w-6 text-primary-foreground" />
+        {/* Animated Logo Section */}
+        <div className="flex items-center gap-2 px-4 py-5 border-b border-border/40">
+          <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary/60 animate-pulse">
+            <Play className="h-5 w-5 text-primary-foreground" />
           </div>
           {!isCollapsed && (
-            <span className="text-lg font-bold bg-gradient-to-r from-primary to-glow-cyan bg-clip-text text-transparent">
-              ANIMIXPLAY
+            <span className="text-lg font-bold bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent">
+              AnimixPlay
             </span>
           )}
         </div>
@@ -62,6 +61,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild tooltip={item.title}>
                     <NavLink
                       to={item.url}
+                      end={item.url === "/"}
                       className={({ isActive }) =>
                         `flex items-center gap-3 px-3 py-2 rounded-lg transition-all ${
                           isActive

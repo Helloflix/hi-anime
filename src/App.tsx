@@ -20,6 +20,7 @@ import Contact from "./pages/Contact";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Trending from "./pages/Trending";
+import Auth from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -44,11 +45,12 @@ const App = () => (
             <Route path="/search" element={<SearchPage />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/profile" element={<Profile />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/trending" element={<Trending />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Layout>
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/trending" element={<Trending />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Layout>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

@@ -1,5 +1,9 @@
-import { useState } from "react";
-import { User, Heart, Clock, Bookmark, Settings, Edit } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { User, Heart, Clock, Bookmark, Settings as SettingsIcon, Edit, LogOut } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,15 +12,68 @@ import { Badge } from "@/components/ui/badge";
 import AnimeCard from "@/components/AnimeCard";
 
 const Profile = () => {
-  const [user] = useState({
-    name: "Anime Otaku",
-    email: "otaku@animixplay.com",
-    avatar: "",
-    joinDate: "January 2023",
-    watchedEpisodes: 1247,
-    completedAnime: 89,
-    favoriteGenres: ["Action", "Fantasy", "Romance"]
-  });
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    checkUser();
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (!session) {
+        navigate("/auth");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
+  const checkUser = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate("/auth");
+        return;
+      }
+      setUser(session.user);
+    } catch (error) {
+      console.error("Error checking user:", error);
+      navigate("/auth");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast({
+        title: "Logged out",
+        description: "You've been successfully logged out.",
+      });
+      navigate("/");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message,
+      });
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8 flex items-center justify-center min-h-[400px]">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   // Mock data for different lists
   const watchlist = [
@@ -35,68 +92,85 @@ const Profile = () => {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-4 md:py-8">
       {/* Profile Header */}
-      <div className="mb-8">
+      <div className="mb-6 md:mb-8">
         <Card className="anime-card">
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
-              <Avatar className="h-24 w-24">
-                <AvatarImage src={user.avatar} />
-                <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
-                  <User className="h-8 w-8" />
+          <CardContent className="p-4 md:p-6">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start space-y-4 sm:space-y-0 sm:space-x-4 md:space-x-6">
+              <Avatar className="h-20 w-20 md:h-24 md:w-24">
+                <AvatarImage src={user.user_metadata?.avatar_url} />
+                <AvatarFallback className="text-xl md:text-2xl bg-primary text-primary-foreground">
+                  <User className="h-6 w-6 md:h-8 md:w-8" />
                 </AvatarFallback>
               </Avatar>
               
-              <div className="flex-1 text-center md:text-left">
-                <h1 className="text-2xl font-bold mb-2">{user.name}</h1>
-                <p className="text-muted-foreground mb-4">{user.email}</p>
+              <div className="flex-1 text-center sm:text-left w-full">
+                <h1 className="text-xl md:text-2xl font-bold mb-1 md:mb-2">
+                  {user.user_metadata?.username || user.email?.split("@")[0]}
+                </h1>
+                <p className="text-sm md:text-base text-muted-foreground mb-3 md:mb-4">{user.email}</p>
                 
-                <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-4">
-                  {user.favoriteGenres.map(genre => (
-                    <Badge key={genre} variant="secondary">{genre}</Badge>
-                  ))}
+                <div className="flex flex-wrap gap-2 justify-center sm:justify-start mb-3 md:mb-4">
+                  <Badge variant="secondary">Action</Badge>
+                  <Badge variant="secondary">Fantasy</Badge>
+                  <Badge variant="secondary">Romance</Badge>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4 text-center md:text-left">
+                <div className="grid grid-cols-2 gap-3 md:gap-4 text-center sm:text-left">
                   <div>
-                    <p className="text-2xl font-bold text-primary">{user.watchedEpisodes}</p>
-                    <p className="text-sm text-muted-foreground">Episodes Watched</p>
+                    <p className="text-xl md:text-2xl font-bold text-primary">0</p>
+                    <p className="text-xs md:text-sm text-muted-foreground">Episodes Watched</p>
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-primary">{user.completedAnime}</p>
-                    <p className="text-sm text-muted-foreground">Anime Completed</p>
+                    <p className="text-xl md:text-2xl font-bold text-primary">0</p>
+                    <p className="text-xs md:text-sm text-muted-foreground">Anime Completed</p>
                   </div>
                 </div>
               </div>
               
-              <Button className="glow-effect">
-                <Edit className="h-4 w-4 mr-2" />
-                Edit Profile
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <Button className="glow-effect w-full sm:w-auto" size="sm">
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit Profile
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  onClick={handleLogout}
+                  className="w-full sm:w-auto"
+                  size="sm"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Profile Tabs */}
-      <Tabs defaultValue="watching" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="watching" className="flex items-center">
-            <Clock className="h-4 w-4 mr-2" />
-            Watching
+      <Tabs defaultValue="watching" className="space-y-4 md:space-y-6">
+        <TabsList className="grid w-full grid-cols-4 h-auto">
+          <TabsTrigger value="watching" className="flex flex-col sm:flex-row items-center py-2 sm:py-3 text-xs sm:text-sm">
+            <Clock className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 mb-1 sm:mb-0" />
+            <span className="hidden sm:inline">Watching</span>
+            <span className="sm:hidden">Watch</span>
           </TabsTrigger>
-          <TabsTrigger value="completed" className="flex items-center">
-            <Bookmark className="h-4 w-4 mr-2" />
-            Completed
+          <TabsTrigger value="completed" className="flex flex-col sm:flex-row items-center py-2 sm:py-3 text-xs sm:text-sm">
+            <Bookmark className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 mb-1 sm:mb-0" />
+            <span className="hidden sm:inline">Completed</span>
+            <span className="sm:hidden">Done</span>
           </TabsTrigger>
-          <TabsTrigger value="favorites" className="flex items-center">
-            <Heart className="h-4 w-4 mr-2" />
-            Favorites
+          <TabsTrigger value="favorites" className="flex flex-col sm:flex-row items-center py-2 sm:py-3 text-xs sm:text-sm">
+            <Heart className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 mb-1 sm:mb-0" />
+            <span className="hidden sm:inline">Favorites</span>
+            <span className="sm:hidden">Favs</span>
           </TabsTrigger>
-          <TabsTrigger value="settings" className="flex items-center">
-            <Settings className="h-4 w-4 mr-2" />
-            Settings
+          <TabsTrigger value="settings" className="flex flex-col sm:flex-row items-center py-2 sm:py-3 text-xs sm:text-sm">
+            <SettingsIcon className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 mb-1 sm:mb-0" />
+            <span className="hidden sm:inline">Account</span>
+            <span className="sm:hidden">Acct</span>
           </TabsTrigger>
         </TabsList>
 
@@ -109,7 +183,7 @@ const Profile = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
                 {watchlist.map(anime => (
                   <AnimeCard 
                     key={anime.id} 
@@ -134,7 +208,7 @@ const Profile = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
                 {completed.map(anime => (
                   <AnimeCard 
                     key={anime.id} 
@@ -159,7 +233,7 @@ const Profile = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
                 {favorites.map(anime => (
                   <AnimeCard 
                     key={anime.id} 
@@ -189,14 +263,15 @@ const Profile = () => {
                 Update Profile Information
               </Button>
               <Button variant="outline" className="w-full justify-start">
-                <Settings className="h-4 w-4 mr-2" />
+                <SettingsIcon className="h-4 w-4 mr-2" />
                 Notification Preferences
               </Button>
               <Button variant="outline" className="w-full justify-start">
                 Privacy Settings
               </Button>
-              <Button variant="destructive" className="w-full justify-start">
-                Delete Account
+              <Button variant="destructive" className="w-full justify-start" onClick={handleLogout}>
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
               </Button>
             </CardContent>
           </Card>
