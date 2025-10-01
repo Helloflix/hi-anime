@@ -4,6 +4,7 @@ import { Search, Menu, X, Filter, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const Header = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -28,8 +29,14 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4">
+        {/* Desktop Sidebar Toggle */}
+        <div className="hidden md:block">
+          <SidebarTrigger />
+        </div>
+
         {/* Mobile Menu */}
-        <Sheet>
+        <div className="md:hidden">
+          <Sheet>
           <SheetTrigger asChild>
             <Button variant="ghost" size="sm" className="md:hidden">
               <Menu className="h-5 w-5" />
@@ -71,9 +78,10 @@ const Header = () => {
             </div>
           </SheetContent>
         </Sheet>
+        </div>
 
-        {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2">
+        {/* Logo - Hidden on desktop as it's in sidebar */}
+        <Link to="/" className="flex items-center space-x-2 md:hidden">
           <div className="flex items-center justify-center w-10 h-10 rounded-lg animix-gradient">
             <Play className="h-6 w-6 text-primary-foreground" />
           </div>
@@ -83,7 +91,7 @@ const Header = () => {
         </Link>
 
         {/* Search Bar */}
-        <div className="flex-1 max-w-xl mx-4 hidden sm:block">
+        <div className="flex-1 max-w-2xl mx-4 hidden sm:block">
           <div className="relative">
             <div className="flex items-center">
               <Input
@@ -101,23 +109,6 @@ const Header = () => {
             </div>
           </div>
         </div>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-6">
-          {navItems.map((item) => (
-            <Link
-              key={item.name}
-              to={item.href}
-              className={`px-3 py-2 rounded-lg transition-all duration-200 ${
-                isActivePath(item.href)
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-              }`}
-            >
-              {item.name}
-            </Link>
-          ))}
-        </nav>
 
         {/* Mobile Search */}
         <Button variant="ghost" size="sm" className="sm:hidden">
