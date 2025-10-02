@@ -3,7 +3,8 @@ import Header from "./Header";
 import Footer from "./Footer";
 import BottomNavigation from "./BottomNavigation";
 import { AppSidebar } from "./AppSidebar";
-import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
+import { EntertainmentSidebar } from "./EntertainmentSidebar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 
 interface LayoutProps {
   children: ReactNode;
@@ -13,8 +14,8 @@ const Layout = ({ children }: LayoutProps) => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
-        {/* Desktop Sidebar - Hidden on mobile */}
-        <div className="hidden md:block">
+        {/* Left Navigation Sidebar - Hidden on mobile and tablet */}
+        <div className="hidden lg:block">
           <AppSidebar />
         </div>
 
@@ -26,6 +27,9 @@ const Layout = ({ children }: LayoutProps) => {
           </main>
           <Footer />
         </SidebarInset>
+
+        {/* Right Entertainment Sidebar - Hidden on mobile and tablet */}
+        <EntertainmentSidebar />
 
         {/* Mobile Bottom Navigation - Hidden on desktop */}
         <div className="md:hidden">
