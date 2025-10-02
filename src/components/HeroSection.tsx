@@ -93,7 +93,7 @@ const HeroSection = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 container px-4 py-20">
+      <div className="relative z-10 container max-w-7xl px-4 py-20 mx-auto">
         <div className="max-w-2xl space-y-6 animate-slide-up">
           {/* Spotlight Badge */}
           <div className="flex items-center space-x-2">

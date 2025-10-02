@@ -12,12 +12,10 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <div className="min-h-screen flex w-full">
-        {/* Left Navigation Sidebar - Hidden on mobile and tablet */}
-        <div className="hidden lg:block">
-          <AppSidebar />
-        </div>
+        {/* Left Navigation Sidebar */}
+        <AppSidebar />
 
         {/* Main Content */}
         <SidebarInset className="flex-1 flex flex-col">
@@ -28,7 +26,7 @@ const Layout = ({ children }: LayoutProps) => {
           <Footer />
         </SidebarInset>
 
-        {/* Right Entertainment Sidebar - Hidden on mobile and tablet */}
+        {/* Right Entertainment Sidebar */}
         <EntertainmentSidebar />
 
         {/* Mobile Bottom Navigation - Hidden on desktop */}
