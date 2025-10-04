@@ -1,4 +1,4 @@
-import { Home, Search, TrendingUp, User, Settings, List, Film, Tv, Star, Play, ChevronRight } from "lucide-react";
+import { Home, Search, TrendingUp, User, Settings, List, Film, Tv, Star, Play } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -39,59 +39,65 @@ export function AppSidebar() {
   return (
     <Sidebar 
       collapsible="icon" 
-      className="border-r border-border/20 bg-sidebar-background/95 backdrop-blur-md"
+      className="border-r border-border/10 bg-sidebar-background/98 backdrop-blur-xl"
     >
-      <SidebarContent className="py-4">
-        {/* Firebase-inspired Logo Section */}
-        <div className="px-4 pb-4 mb-2">
+      <SidebarContent className="py-6 px-3">
+        {/* Modern Logo Section */}
+        <div className="px-2 pb-6 mb-4">
           {open ? (
-            <div className="flex items-center space-x-3 group">
-              <div className="relative flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-primary/80 shadow-sm transition-transform group-hover:scale-105">
-                <Play className="h-5 w-5 text-primary-foreground" />
+            <div className="flex items-center gap-3 group cursor-pointer">
+              <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-primary shadow-lg shadow-primary/25 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/40 group-hover:scale-105">
+                <Play className="h-5 w-5 text-primary-foreground fill-current" />
               </div>
               <div className="flex flex-col">
-                <span className="text-base font-semibold text-sidebar-foreground tracking-tight">AnimixPlay</span>
-                <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Stream</span>
+                <span className="text-lg font-bold text-foreground tracking-tight">AnimixPlay</span>
+                <span className="text-xs text-muted-foreground font-medium">Stream Anime</span>
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-center group">
-              <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-primary/80 shadow-sm transition-transform group-hover:scale-105">
-                <Play className="h-5 w-5 text-primary-foreground" />
+            <div className="flex items-center justify-center group cursor-pointer">
+              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary shadow-lg shadow-primary/25 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/40 group-hover:scale-105">
+                <Play className="h-5 w-5 text-primary-foreground fill-current" />
               </div>
             </div>
           )}
         </div>
 
-        {/* Main Navigation - Firebase style */}
-        <SidebarGroup className="px-3">
+        {/* Main Navigation - Modern clean style */}
+        <SidebarGroup className="px-0">
           {open && (
-            <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-              Navigate
+            <SidebarGroupLabel className="px-2 pb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground/70">
+              Menu
             </SidebarGroupLabel>
           )}
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-0.5">
+            <SidebarMenu className="space-y-1">
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="h-9">
+                  <SidebarMenuButton asChild className="h-11">
                     <NavLink
                       to={item.url}
                       end={item.url === "/"}
                       className={({ isActive }) =>
                         cn(
-                          "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
+                          "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300",
                           isActive
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
-                            : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                            ? "bg-primary/10 text-primary shadow-sm border border-primary/20"
+                            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground hover:border hover:border-border/50"
                         )
                       }
                     >
                       {({ isActive }) => (
                         <>
-                          <item.icon className={cn("h-[18px] w-[18px]", isActive && "text-primary")} />
-                          {open && <span className="flex-1">{item.title}</span>}
-                          {open && isActive && <ChevronRight className="h-4 w-4 text-primary" />}
+                          <div className={cn(
+                            "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-300",
+                            isActive 
+                              ? "bg-primary/20 text-primary" 
+                              : "bg-muted/50 text-muted-foreground group-hover:bg-accent group-hover:text-foreground"
+                          )}>
+                            <item.icon className="h-4 w-4" />
+                          </div>
+                          {open && <span className="flex-1 font-medium">{item.title}</span>}
                         </>
                       )}
                     </NavLink>
@@ -102,34 +108,40 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Browse Section - Firebase style */}
-        <SidebarGroup className="px-3 mt-6">
+        {/* Browse Section - Modern clean style */}
+        <SidebarGroup className="px-0 mt-8">
           {open && (
-            <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
-              Browse Content
+            <SidebarGroupLabel className="px-2 pb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground/70">
+              Browse
             </SidebarGroupLabel>
           )}
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-0.5">
+            <SidebarMenu className="space-y-1">
               {browseItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="h-9">
+                  <SidebarMenuButton asChild className="h-11">
                     <NavLink
                       to={item.url}
                       className={({ isActive }) =>
                         cn(
-                          "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
+                          "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300",
                           isActive
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
-                            : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                            ? "bg-primary/10 text-primary shadow-sm border border-primary/20"
+                            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground hover:border hover:border-border/50"
                         )
                       }
                     >
                       {({ isActive }) => (
                         <>
-                          <item.icon className={cn("h-[18px] w-[18px]", isActive && "text-primary")} />
-                          {open && <span className="flex-1">{item.title}</span>}
-                          {open && isActive && <ChevronRight className="h-4 w-4 text-primary" />}
+                          <div className={cn(
+                            "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-300",
+                            isActive 
+                              ? "bg-primary/20 text-primary" 
+                              : "bg-muted/50 text-muted-foreground group-hover:bg-accent group-hover:text-foreground"
+                          )}>
+                            <item.icon className="h-4 w-4" />
+                          </div>
+                          {open && <span className="flex-1 font-medium">{item.title}</span>}
                         </>
                       )}
                     </NavLink>
@@ -140,34 +152,40 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Account Section - Firebase style */}
-        <SidebarGroup className="px-3 mt-6">
+        {/* Account Section - Modern clean style */}
+        <SidebarGroup className="px-0 mt-8">
           {open && (
-            <SidebarGroupLabel className="px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+            <SidebarGroupLabel className="px-2 pb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground/70">
               Account
             </SidebarGroupLabel>
           )}
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-0.5">
+            <SidebarMenu className="space-y-1">
               {accountItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="h-9">
+                  <SidebarMenuButton asChild className="h-11">
                     <NavLink
                       to={item.url}
                       className={({ isActive }) =>
                         cn(
-                          "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200",
+                          "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300",
                           isActive
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground shadow-sm"
-                            : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground"
+                            ? "bg-primary/10 text-primary shadow-sm border border-primary/20"
+                            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground hover:border hover:border-border/50"
                         )
                       }
                     >
                       {({ isActive }) => (
                         <>
-                          <item.icon className={cn("h-[18px] w-[18px]", isActive && "text-primary")} />
-                          {open && <span className="flex-1">{item.title}</span>}
-                          {open && isActive && <ChevronRight className="h-4 w-4 text-primary" />}
+                          <div className={cn(
+                            "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-300",
+                            isActive 
+                              ? "bg-primary/20 text-primary" 
+                              : "bg-muted/50 text-muted-foreground group-hover:bg-accent group-hover:text-foreground"
+                          )}>
+                            <item.icon className="h-4 w-4" />
+                          </div>
+                          {open && <span className="flex-1 font-medium">{item.title}</span>}
                         </>
                       )}
                     </NavLink>
