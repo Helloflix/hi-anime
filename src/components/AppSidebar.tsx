@@ -1,4 +1,4 @@
-import { Home, Search, TrendingUp, User, Settings, List, Film, Tv, Star, Play } from "lucide-react";
+import { Home, Search, TrendingUp, User, Settings, List, Film, Tv, Star, Play, Mic2, Subtitles } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -24,8 +24,8 @@ const browseItems = [
   { title: "Movies", url: "/movies", icon: Film },
   { title: "TV Series", url: "/tv-series", icon: Tv },
   { title: "Most Popular", url: "/most-popular", icon: Star },
-  { title: "Subbed", url: "/subbed-anime", icon: Play },
-  { title: "Dubbed", url: "/dubbed-anime", icon: Play },
+  { title: "Subbed", url: "/subbed-anime", icon: Subtitles },
+  { title: "Dubbed", url: "/dubbed-anime", icon: Mic2 },
 ];
 
 const accountItems = [
@@ -39,65 +39,61 @@ export function AppSidebar() {
   return (
     <Sidebar 
       collapsible="icon" 
-      className="border-r border-border/10 bg-sidebar-background/98 backdrop-blur-xl"
+      className="border-none bg-sidebar-background/50 backdrop-blur-2xl"
     >
-      <SidebarContent className="py-6 px-3">
-        {/* Modern Logo Section */}
-        <div className="px-2 pb-6 mb-4">
+      <SidebarContent className="py-4 px-2">
+        {/* Minimalist Logo Section */}
+        <div className="px-3 pb-4 mb-2 border-b border-border/5">
           {open ? (
-            <div className="flex items-center gap-3 group cursor-pointer">
-              <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-primary shadow-lg shadow-primary/25 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/40 group-hover:scale-105">
-                <Play className="h-5 w-5 text-primary-foreground fill-current" />
+            <div className="flex items-center gap-3 cursor-pointer group">
+              <div className="relative flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-primary/70 transition-all duration-200 group-hover:scale-105">
+                <Play className="h-4 w-4 text-primary-foreground fill-current" />
               </div>
               <div className="flex flex-col">
-                <span className="text-lg font-bold text-foreground tracking-tight">AnimixPlay</span>
-                <span className="text-xs text-muted-foreground font-medium">Stream Anime</span>
+                <span className="text-base font-bold text-foreground">AnimixPlay</span>
+                <span className="text-[10px] text-muted-foreground/60">Stream Anime</span>
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-center group cursor-pointer">
-              <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-primary shadow-lg shadow-primary/25 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/40 group-hover:scale-105">
-                <Play className="h-5 w-5 text-primary-foreground fill-current" />
+            <div className="flex items-center justify-center cursor-pointer group">
+              <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-primary/70 transition-all duration-200 group-hover:scale-105">
+                <Play className="h-4 w-4 text-primary-foreground fill-current" />
               </div>
             </div>
           )}
         </div>
 
-        {/* Main Navigation - Modern clean style */}
+        {/* Main Navigation - Ultra Clean Minimalist */}
         <SidebarGroup className="px-0">
           {open && (
-            <SidebarGroupLabel className="px-2 pb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground/70">
+            <SidebarGroupLabel className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40">
               Menu
             </SidebarGroupLabel>
           )}
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
+            <SidebarMenu className="space-y-0.5">
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="h-11">
+                  <SidebarMenuButton asChild className="h-10">
                     <NavLink
                       to={item.url}
                       end={item.url === "/"}
                       className={({ isActive }) =>
                         cn(
-                          "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300",
+                          "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200",
                           isActive
-                            ? "bg-primary/10 text-primary shadow-sm border border-primary/20"
-                            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground hover:border hover:border-border/50"
+                            ? "bg-primary/10 text-primary font-medium"
+                            : "text-muted-foreground hover:bg-accent/30 hover:text-foreground"
                         )
                       }
                     >
                       {({ isActive }) => (
                         <>
-                          <div className={cn(
-                            "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-300",
-                            isActive 
-                              ? "bg-primary/20 text-primary" 
-                              : "bg-muted/50 text-muted-foreground group-hover:bg-accent group-hover:text-foreground"
-                          )}>
-                            <item.icon className="h-4 w-4" />
-                          </div>
-                          {open && <span className="flex-1 font-medium">{item.title}</span>}
+                          <item.icon className={cn(
+                            "h-[18px] w-[18px] transition-all duration-200",
+                            isActive ? "text-primary" : "text-muted-foreground"
+                          )} />
+                          {open && <span className="text-[13px]">{item.title}</span>}
                         </>
                       )}
                     </NavLink>
@@ -108,40 +104,36 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Browse Section - Modern clean style */}
-        <SidebarGroup className="px-0 mt-8">
+        {/* Browse Section - Ultra Clean Minimalist */}
+        <SidebarGroup className="px-0 mt-6">
           {open && (
-            <SidebarGroupLabel className="px-2 pb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground/70">
+            <SidebarGroupLabel className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40">
               Browse
             </SidebarGroupLabel>
           )}
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
+            <SidebarMenu className="space-y-0.5">
               {browseItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="h-11">
+                  <SidebarMenuButton asChild className="h-10">
                     <NavLink
                       to={item.url}
                       className={({ isActive }) =>
                         cn(
-                          "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300",
+                          "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200",
                           isActive
-                            ? "bg-primary/10 text-primary shadow-sm border border-primary/20"
-                            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground hover:border hover:border-border/50"
+                            ? "bg-primary/10 text-primary font-medium"
+                            : "text-muted-foreground hover:bg-accent/30 hover:text-foreground"
                         )
                       }
                     >
                       {({ isActive }) => (
                         <>
-                          <div className={cn(
-                            "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-300",
-                            isActive 
-                              ? "bg-primary/20 text-primary" 
-                              : "bg-muted/50 text-muted-foreground group-hover:bg-accent group-hover:text-foreground"
-                          )}>
-                            <item.icon className="h-4 w-4" />
-                          </div>
-                          {open && <span className="flex-1 font-medium">{item.title}</span>}
+                          <item.icon className={cn(
+                            "h-[18px] w-[18px] transition-all duration-200",
+                            isActive ? "text-primary" : "text-muted-foreground"
+                          )} />
+                          {open && <span className="text-[13px]">{item.title}</span>}
                         </>
                       )}
                     </NavLink>
@@ -152,40 +144,36 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Account Section - Modern clean style */}
-        <SidebarGroup className="px-0 mt-8">
+        {/* Account Section - Ultra Clean Minimalist */}
+        <SidebarGroup className="px-0 mt-6">
           {open && (
-            <SidebarGroupLabel className="px-2 pb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground/70">
+            <SidebarGroupLabel className="px-3 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40">
               Account
             </SidebarGroupLabel>
           )}
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
+            <SidebarMenu className="space-y-0.5">
               {accountItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="h-11">
+                  <SidebarMenuButton asChild className="h-10">
                     <NavLink
                       to={item.url}
                       className={({ isActive }) =>
                         cn(
-                          "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-300",
+                          "flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200",
                           isActive
-                            ? "bg-primary/10 text-primary shadow-sm border border-primary/20"
-                            : "text-muted-foreground hover:bg-accent/50 hover:text-foreground hover:border hover:border-border/50"
+                            ? "bg-primary/10 text-primary font-medium"
+                            : "text-muted-foreground hover:bg-accent/30 hover:text-foreground"
                         )
                       }
                     >
                       {({ isActive }) => (
                         <>
-                          <div className={cn(
-                            "flex items-center justify-center w-8 h-8 rounded-lg transition-all duration-300",
-                            isActive 
-                              ? "bg-primary/20 text-primary" 
-                              : "bg-muted/50 text-muted-foreground group-hover:bg-accent group-hover:text-foreground"
-                          )}>
-                            <item.icon className="h-4 w-4" />
-                          </div>
-                          {open && <span className="flex-1 font-medium">{item.title}</span>}
+                          <item.icon className={cn(
+                            "h-[18px] w-[18px] transition-all duration-200",
+                            isActive ? "text-primary" : "text-muted-foreground"
+                          )} />
+                          {open && <span className="text-[13px]">{item.title}</span>}
                         </>
                       )}
                     </NavLink>
