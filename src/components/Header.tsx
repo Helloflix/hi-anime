@@ -8,6 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { toast } from "sonner";
+import { ThemeToggle } from "./ThemeToggle";
 
 const Header = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -42,7 +43,7 @@ const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border/20 bg-background/60 backdrop-blur-xl supports-[backdrop-filter]:bg-background/40">
       <div className="flex h-14 md:h-12 lg:h-16 items-center px-3 md:px-3 lg:px-4 gap-2 md:gap-3 lg:gap-4">
         {/* Sidebar Toggle - visible on all screens */}
         <SidebarTrigger className="h-8 w-8 md:h-7 md:w-7 lg:h-9 lg:w-9" />
@@ -70,6 +71,7 @@ const Header = () => {
 
         {/* Action Buttons - Compact on tablet */}
         <div className="flex items-center space-x-1 md:space-x-1 lg:space-x-2 relative">
+          <ThemeToggle />
           {user ? (
             <>
               <Button 

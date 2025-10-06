@@ -8,102 +8,113 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Dark AnimixPlay theme - dark blue backgrounds */
-    --background: 220 30% 6%;
-    --foreground: 0 0% 95%;
+    /* Light mode - clean and modern */
+    --background: 0 0% 100%;
+    --foreground: 222.2 47.4% 11.2%;
 
-    /* Card backgrounds with blue tint */
-    --card: 220 25% 10%;
-    --card-foreground: 0 0% 92%;
+    /* Card backgrounds */
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 47.4% 11.2%;
 
     /* Popover styling */
-    --popover: 220 30% 8%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 47.4% 11.2%;
 
-    /* Blue primary (AnimixPlay accent) */
-    --primary: 210 100% 60%;
-    --primary-foreground: 0 0% 98%;
+    /* Blue primary */
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 0 0% 100%;
 
-    /* Darker blue secondary */
-    --secondary: 220 25% 14%;
-    --secondary-foreground: 0 0% 85%;
+    /* Secondary */
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
 
     /* Muted elements */
-    --muted: 220 20% 12%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    /* Blue accent */
-    --accent: 215 80% 30%;
-    --accent-foreground: 0 0% 95%;
+    /* Accent */
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
 
-    /* Destructive red */
-    --destructive: 0 70% 60%;
-    --destructive-foreground: 0 0% 98%;
+    /* Destructive */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
 
-    /* Borders and inputs with blue tint */
-    --border: 220 25% 18%;
-    --input: 220 20% 12%;
-    --ring: 210 100% 60%;
+    /* Borders and inputs */
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 217.2 91.2% 59.8%;
 
     --radius: 0.5rem;
 
-    /* Custom AnimixPlay theme colors */
-    --animix-gradient: linear-gradient(135deg, hsl(210 100% 60%), hsl(220 80% 50%));
-    --hero-gradient: linear-gradient(45deg, hsl(220 30% 6%), hsl(215 25% 10%));
-    --card-gradient: linear-gradient(135deg, hsl(220 25% 10%), hsl(215 20% 14%));
-    --glow-blue: 210 100% 60%;
+    /* Custom gradients for light mode */
+    --animix-gradient: linear-gradient(135deg, hsl(217.2 91.2% 59.8%), hsl(220 80% 50%));
+    --hero-gradient: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 40% 98%));
+    --card-gradient: linear-gradient(135deg, hsl(0 0% 100%), hsl(210 40% 99%));
+    --glow-blue: 217.2 91.2% 59.8%;
     --glow-cyan: 190 100% 50%;
     
-    /* Shadows with AnimixPlay theme */
-    --shadow-glow: 0 0 30px hsl(var(--glow-blue) / 0.4);
-    --shadow-card: 0 8px 20px hsl(220 30% 3% / 0.6);
-    --shadow-hero: 0 20px 40px hsl(220 30% 2% / 0.8);
+    /* Shadows for light mode */
+    --shadow-glow: 0 0 30px hsl(var(--glow-blue) / 0.15);
+    --shadow-card: 0 4px 16px hsl(222.2 47.4% 11.2% / 0.08);
+    --shadow-hero: 0 10px 30px hsl(222.2 47.4% 11.2% / 0.1);
 
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
-    /* Firebase-inspired sidebar colors for light mode */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 15% 25%;
-    --sidebar-primary: 210 100% 60%;
+    /* Sidebar colors for light mode */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 222.2 47.4% 11.2%;
+    --sidebar-primary: 217.2 91.2% 59.8%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 20% 95%;
-    --sidebar-accent-foreground: 220 15% 20%;
-    --sidebar-border: 220 15% 90%;
-    --sidebar-ring: 210 100% 60%;
+    --sidebar-accent: 210 40% 96.1%;
+    --sidebar-accent-foreground: 222.2 47.4% 11.2%;
+    --sidebar-border: 214.3 31.8% 91.4%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    /* Even darker AnimixPlay theme */
-    --background: 220 35% 4%;
-    --foreground: 0 0% 98%;
+    /* Dark mode - AnimixPlay theme */
+    --background: 220 30% 6%;
+    --foreground: 0 0% 95%;
 
-    --card: 220 30% 7%;
-    --card-foreground: 0 0% 95%;
+    --card: 220 25% 10%;
+    --card-foreground: 0 0% 92%;
 
-    --popover: 220 35% 5%;
+    --popover: 220 30% 8%;
     --popover-foreground: 0 0% 95%;
 
-    --primary: 210 100% 65%;
+    --primary: 210 100% 60%;
     --primary-foreground: 0 0% 98%;
 
-    --secondary: 220 30% 12%;
-    --secondary-foreground: 0 0% 90%;
+    --secondary: 220 25% 14%;
+    --secondary-foreground: 0 0% 85%;
 
-    --muted: 220 25% 10%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 220 20% 12%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 215 85% 25%;
+    --accent: 215 80% 30%;
     --accent-foreground: 0 0% 95%;
 
-    --destructive: 0 75% 65%;
+    --destructive: 0 70% 60%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 220 30% 13%;
-    --input: 220 25% 10%;
-    --ring: 210 100% 65%;
-    /* Firebase-inspired sidebar colors for dark mode */
+    --border: 220 25% 18%;
+    --input: 220 20% 12%;
+    --ring: 210 100% 60%;
+
+    /* Custom gradients for dark mode */
+    --animix-gradient: linear-gradient(135deg, hsl(210 100% 60%), hsl(220 80% 50%));
+    --hero-gradient: linear-gradient(45deg, hsl(220 30% 6%), hsl(215 25% 10%));
+    --card-gradient: linear-gradient(135deg, hsl(220 25% 10%), hsl(215 20% 14%));
+    
+    /* Shadows for dark mode */
+    --shadow-glow: 0 0 30px hsl(var(--glow-blue) / 0.4);
+    --shadow-card: 0 8px 20px hsl(220 30% 3% / 0.6);
+    --shadow-hero: 0 20px 40px hsl(220 30% 2% / 0.8);
+
+    /* Sidebar colors for dark mode */
     --sidebar-background: 220 30% 8%;
     --sidebar-foreground: 0 0% 90%;
     --sidebar-primary: 210 100% 65%;
@@ -121,7 +132,7 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground font-sans transition-colors duration-300;
     background: var(--hero-gradient);
     min-height: 100vh;
   }
@@ -179,10 +190,24 @@ All colors MUST be HSL.
     background: var(--animix-gradient);
   }
 
-  /* Bottom navigation styling */
+  /* Bottom navigation with glassmorphism */
   .bottom-nav {
-    backdrop-filter: blur(12px);
-    background: hsl(var(--card) / 0.9);
-    border-top: 1px solid hsl(var(--border));
+    backdrop-filter: blur(20px) saturate(180%);
+    background: hsl(var(--card) / 0.8);
+    border: 1px solid hsl(var(--border) / 0.3);
+    box-shadow: 0 -4px 20px hsl(var(--foreground) / 0.05);
+  }
+
+  /* Glassmorphism utility classes */
+  .glass {
+    backdrop-filter: blur(20px) saturate(180%);
+    background: hsl(var(--background) / 0.7);
+    border: 1px solid hsl(var(--border) / 0.2);
+  }
+
+  .glass-card {
+    backdrop-filter: blur(24px) saturate(200%);
+    background: hsl(var(--card) / 0.6);
+    border: 1px solid hsl(var(--border) / 0.3);
   }
 }

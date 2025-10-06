@@ -26,7 +26,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="relative border-t border-border/20 bg-gradient-to-b from-card/40 to-background/60 backdrop-blur-xl">
+    <footer className="relative border-t border-border/20 bg-background/60 backdrop-blur-xl supports-[backdrop-filter]:bg-background/40">
       <div className="container mx-auto px-4 py-12 md:py-16">
         {/* Main Footer Content */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-12 mb-12">
