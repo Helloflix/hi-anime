@@ -1,6 +1,5 @@
 import { ReactNode } from "react";
 import Header from "./Header";
-import Footer from "./Footer";
 import BottomNavigation from "./BottomNavigation";
 import { AppSidebar } from "./AppSidebar";
 import { EntertainmentSidebar } from "./EntertainmentSidebar";
@@ -23,7 +22,6 @@ const Layout = ({ children }: LayoutProps) => {
           <main className="flex-1 pb-20 md:pb-0">
             {children}
           </main>
-          <Footer />
         </SidebarInset>
 
         {/* Right Entertainment Sidebar */}

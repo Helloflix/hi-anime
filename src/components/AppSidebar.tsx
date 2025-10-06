@@ -1,4 +1,4 @@
-import { Home, Search, TrendingUp, User, Settings, List, Film, Tv, Star, Play, Mic2, Subtitles } from "lucide-react";
+import { Home, Search, TrendingUp, User, Settings, List, Film, Tv, Star, Play, Mic2, Subtitles, ChevronDown, HelpCircle } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -6,13 +6,14 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
-const navigationItems = [
+const mainItems = [
   { title: "Home", url: "/", icon: Home },
   { title: "Search", url: "/search", icon: Search },
   { title: "Trending", url: "/trending", icon: TrendingUp },
@@ -27,174 +28,222 @@ const browseItems = [
   { title: "Dubbed", url: "/dubbed-anime", icon: Mic2 },
 ];
 
-const accountItems = [
-  { title: "Profile", url: "/profile", icon: User },
+const settingsItems = [
   { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Help Center", url: "/contact", icon: HelpCircle },
 ];
 
 export function AppSidebar() {
   const { open } = useSidebar();
+  const [browseOpen, setBrowseOpen] = useState(true);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
     <Sidebar 
       collapsible="icon" 
-      className="border-r border-border/10 bg-background/40 backdrop-blur-xl supports-[backdrop-filter]:bg-background/30"
+      className="border-r border-border/5"
     >
-      <SidebarContent className="py-6 px-3">
-        {/* Modern Logo Section with glassmorphism */}
-        <div className="px-2 pb-6 mb-4">
-          {open ? (
-            <div className="flex items-center gap-3 cursor-pointer group">
-              <div className="relative flex items-center justify-center w-11 h-11 rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/80 shadow-lg shadow-primary/25 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/30 group-hover:scale-105">
-                <Play className="h-5 w-5 text-primary-foreground fill-current" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-lg font-bold text-foreground tracking-tight">AnimixPlay</span>
-                <span className="text-xs text-muted-foreground">Stream Anime</span>
-              </div>
-            </div>
-          ) : (
-            <div className="flex items-center justify-center cursor-pointer group">
-              <div className="flex items-center justify-center w-11 h-11 rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/80 shadow-lg shadow-primary/25 transition-all duration-300 group-hover:shadow-xl group-hover:shadow-primary/30 group-hover:scale-105">
-                <Play className="h-5 w-5 text-primary-foreground fill-current" />
-              </div>
+      <SidebarContent className="bg-sidebar-background">
+        {/* Logo Section */}
+        <div className={cn(
+          "flex items-center gap-3 px-4 py-6 border-b border-border/5",
+          !open && "justify-center px-2"
+        )}>
+          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary">
+            <Play className="h-5 w-5 text-primary-foreground fill-current" />
+          </div>
+          {open && (
+            <div className="flex flex-col">
+              <span className="text-base font-semibold text-sidebar-foreground">AnimixPlay</span>
             </div>
           )}
         </div>
 
-        {/* Main Navigation */}
-        <SidebarGroup className="px-0 mb-6">
+        {/* Search Bar */}
+        {open && (
+          <div className="px-4 py-4">
+            <NavLink to="/search">
+              <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-sidebar-accent/40 hover:bg-sidebar-accent/60 transition-colors cursor-pointer group">
+                <Search className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">Search</span>
+                <span className="ml-auto text-xs text-muted-foreground">⌘ F</span>
+              </div>
+            </NavLink>
+          </div>
+        )}
+
+        {/* Main Menu */}
+        <SidebarGroup className="px-2 py-2">
+          {open && (
+            <div className="px-3 mb-2">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50">
+                Main Menu
+              </span>
+            </div>
+          )}
           <SidebarGroupContent>
-            <SidebarMenu className="space-y-1.5">
-              {navigationItems.map((item) => (
+            <SidebarMenu className="space-y-0.5">
+              {mainItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      end={item.url === "/"}
-                      className={({ isActive }) =>
-                        cn(
-                          "flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[15px] font-medium transition-all duration-300 group relative overflow-hidden",
-                          isActive
-                            ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
-                            : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-                        )
-                      }
-                    >
-                      {({ isActive }) => (
-                        <>
-                          <div className={cn(
-                            "flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-300",
-                            isActive 
-                              ? "bg-primary-foreground/15" 
-                              : "bg-accent/40 group-hover:bg-accent/60"
-                          )}>
-                            <item.icon className={cn(
-                              "h-5 w-5 transition-all duration-300",
-                              isActive ? "text-primary-foreground" : "text-muted-foreground group-hover:text-foreground"
-                            )} />
-                          </div>
-                          {open && (
-                            <span className={cn(
-                              "transition-all duration-300",
-                              isActive ? "text-primary-foreground" : ""
-                            )}>
-                              {item.title}
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
+                  <NavLink
+                    to={item.url}
+                    end={item.url === "/"}
+                    className={({ isActive }) =>
+                      cn(
+                        "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group",
+                        isActive
+                          ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                        !open && "justify-center"
+                      )
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <item.icon className={cn(
+                          "h-5 w-5 transition-transform duration-200",
+                          isActive && "scale-110"
+                        )} />
+                        {open && <span>{item.title}</span>}
+                      </>
+                    )}
+                  </NavLink>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Browse Section */}
-        <SidebarGroup className="px-0 mb-6">
-          {open && (
-            <div className="px-4 pb-3 mb-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
-                Browse
-              </span>
-            </div>
-          )}
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
+        {/* Browse Section - Collapsible */}
+        <Collapsible
+          open={browseOpen}
+          onOpenChange={setBrowseOpen}
+          className="px-2 py-2"
+        >
+          <div className="px-3 mb-2">
+            {open ? (
+              <CollapsibleTrigger className="flex items-center justify-between w-full group hover:text-sidebar-foreground transition-colors">
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50 group-hover:text-muted-foreground/70">
+                  Browse
+                </span>
+                <ChevronDown className={cn(
+                  "h-3 w-3 text-muted-foreground/50 transition-transform duration-200",
+                  browseOpen && "rotate-180"
+                )} />
+              </CollapsibleTrigger>
+            ) : (
+              <div className="h-1 w-full bg-border/10 rounded-full my-2" />
+            )}
+          </div>
+          <CollapsibleContent className="space-y-0.5">
+            <SidebarMenu className="space-y-0.5">
               {browseItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      className={({ isActive }) =>
-                        cn(
-                          "flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-[14px] transition-all duration-300 group",
-                          isActive
-                            ? "bg-accent text-foreground font-medium"
-                            : "text-muted-foreground hover:text-foreground hover:bg-accent/40"
-                        )
-                      }
-                    >
-                      {({ isActive }) => (
-                        <>
-                          <item.icon className={cn(
-                            "h-[18px] w-[18px] transition-all duration-300",
-                            isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
-                          )} />
-                          {open && <span>{item.title}</span>}
-                        </>
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
+                  <NavLink
+                    to={item.url}
+                    className={({ isActive }) =>
+                      cn(
+                        "flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] transition-all duration-200 group",
+                        isActive
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                          : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                        !open && "justify-center"
+                      )
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <item.icon className={cn(
+                          "h-4 w-4 transition-all duration-200",
+                          isActive && "text-primary"
+                        )} />
+                        {open && <span>{item.title}</span>}
+                      </>
+                    )}
+                  </NavLink>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+          </CollapsibleContent>
+        </Collapsible>
 
-        {/* Account Section */}
-        <SidebarGroup className="px-0 mt-auto">
-          {open && (
-            <div className="px-4 pb-3 mb-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
-                Account
-              </span>
-            </div>
-          )}
-          <SidebarGroupContent>
-            <SidebarMenu className="space-y-1">
-              {accountItems.map((item) => (
+        {/* Settings Section - Collapsible */}
+        <Collapsible
+          open={settingsOpen}
+          onOpenChange={setSettingsOpen}
+          className="px-2 py-2 mt-auto"
+        >
+          <div className="px-3 mb-2">
+            {open ? (
+              <CollapsibleTrigger className="flex items-center justify-between w-full group hover:text-sidebar-foreground transition-colors">
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50 group-hover:text-muted-foreground/70">
+                  Settings
+                </span>
+                <ChevronDown className={cn(
+                  "h-3 w-3 text-muted-foreground/50 transition-transform duration-200",
+                  settingsOpen && "rotate-180"
+                )} />
+              </CollapsibleTrigger>
+            ) : (
+              <div className="h-1 w-full bg-border/10 rounded-full my-2" />
+            )}
+          </div>
+          <CollapsibleContent className="space-y-0.5">
+            <SidebarMenu className="space-y-0.5">
+              {settingsItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      className={({ isActive }) =>
-                        cn(
-                          "flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-[14px] transition-all duration-300 group",
-                          isActive
-                            ? "bg-accent text-foreground font-medium"
-                            : "text-muted-foreground hover:text-foreground hover:bg-accent/40"
-                        )
-                      }
-                    >
-                      {({ isActive }) => (
-                        <>
-                          <item.icon className={cn(
-                            "h-[18px] w-[18px] transition-all duration-300",
-                            isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
-                          )} />
-                          {open && <span>{item.title}</span>}
-                        </>
-                      )}
-                    </NavLink>
-                  </SidebarMenuButton>
+                  <NavLink
+                    to={item.url}
+                    className={({ isActive }) =>
+                      cn(
+                        "flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] transition-all duration-200 group",
+                        isActive
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                          : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground",
+                        !open && "justify-center"
+                      )
+                    }
+                  >
+                    {({ isActive }) => (
+                      <>
+                        <item.icon className={cn(
+                          "h-4 w-4 transition-all duration-200",
+                          isActive && "text-primary"
+                        )} />
+                        {open && <span>{item.title}</span>}
+                      </>
+                    )}
+                  </NavLink>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+          </CollapsibleContent>
+        </Collapsible>
+
+        {/* Profile Section */}
+        <div className="px-2 py-4 border-t border-border/5 mt-2">
+          <NavLink
+            to="/profile"
+            className={({ isActive }) =>
+              cn(
+                "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group",
+                isActive
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent/50",
+                !open && "justify-center"
+              )
+            }
+          >
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 border border-primary/20">
+              <User className="h-4 w-4 text-primary" />
+            </div>
+            {open && (
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">Profile</p>
+              </div>
+            )}
+          </NavLink>
+        </div>
       </SidebarContent>
     </Sidebar>
   );

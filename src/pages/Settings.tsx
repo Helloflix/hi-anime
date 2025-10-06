@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Monitor, Moon, Sun, Bell, Shield, Download, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,11 +7,25 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 
 const Settings = () => {
-  const [theme, setTheme] = useState("dark");
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [notifications, setNotifications] = useState(true);
   const [autoplay, setAutoplay] = useState(false);
   const [quality, setQuality] = useState("1080p");
   const [volume, setVolume] = useState([80]);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
+    if (savedTheme) {
+      setTheme(savedTheme);
+    }
+  }, []);
+
+  const handleThemeChange = (newTheme: string) => {
+    const themeValue = newTheme as "light" | "dark";
+    setTheme(themeValue);
+    localStorage.setItem("theme", themeValue);
+    document.documentElement.classList.toggle("dark", themeValue === "dark");
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -40,7 +54,7 @@ const Settings = () => {
                 <label className="text-sm font-medium">Theme</label>
                 <p className="text-sm text-muted-foreground">Choose your preferred theme</p>
               </div>
-              <Select value={theme} onValueChange={setTheme}>
+              <Select value={theme} onValueChange={handleThemeChange}>
                 <SelectTrigger className="w-32">
                   <SelectValue />
                 </SelectTrigger>
