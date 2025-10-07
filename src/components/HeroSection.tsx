@@ -80,7 +80,7 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative min-h-[80vh] flex items-center overflow-hidden">
+    <section className="relative min-h-[60vh] md:min-h-[70vh] lg:min-h-[80vh] flex items-center overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0">
         <img
@@ -93,8 +93,8 @@ const HeroSection = () => {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 container max-w-7xl px-4 py-20 mx-auto">
-        <div className="max-w-2xl space-y-6 animate-slide-up">
+      <div className="relative z-10 container max-w-7xl px-4 py-10 md:py-16 lg:py-20 mx-auto">
+        <div className="max-w-2xl space-y-4 md:space-y-6 animate-slide-up">
           {/* Spotlight Badge */}
           <div className="flex items-center space-x-2">
             <Badge className="bg-primary/20 text-primary border-primary/30 animate-glow-pulse">
@@ -147,25 +147,25 @@ const HeroSection = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex items-center space-x-4 pt-4">
+          <div className="flex items-center space-x-3 pt-2 md:pt-4">
             <Button 
-              size="lg" 
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold animate-glow-pulse"
+              size="default"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold animate-glow-pulse h-9 md:h-10 text-sm"
               asChild
             >
               <Link to={`/watch/${currentAnime.id}`}>
-                <Play className="h-5 w-5 mr-2" />
+                <Play className="h-4 w-4 mr-2" />
                 Watch Now
               </Link>
             </Button>
             <Button 
               variant="outline" 
-              size="lg"
-              className="bg-card/50 backdrop-blur-sm border-border hover:bg-card/70"
+              size="default"
+              className="bg-card/50 backdrop-blur-sm border-border hover:bg-card/70 h-9 md:h-10 text-sm"
               asChild
             >
               <Link to={`/anime/${currentAnime.id}`}>
-                <Info className="h-5 w-5 mr-2" />
+                <Info className="h-4 w-4 mr-2" />
                 Details
               </Link>
             </Button>

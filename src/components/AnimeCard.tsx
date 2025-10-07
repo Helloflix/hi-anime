@@ -48,11 +48,11 @@ const AnimeCard = ({
           <div className="absolute bottom-4 left-4 right-4">
             <Button
               size="sm"
-              className="w-full mb-2 bg-primary hover:bg-primary/90 text-primary-foreground"
+              className="w-full mb-2 bg-primary hover:bg-primary/90 text-primary-foreground h-8 text-xs"
               asChild
             >
               <Link to={`/watch/${id}`}>
-                <Play className="h-4 w-4 mr-2" />
+                <Play className="h-3 w-3 mr-1" />
                 Watch Now
               </Link>
             </Button>
@@ -87,25 +87,26 @@ const AnimeCard = ({
         </Link>
 
         {/* Meta Information */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <div className="flex items-center space-x-3">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
             {year && (
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center gap-1">
                 <Calendar className="h-3 w-3" />
                 <span>{year}</span>
               </div>
             )}
             {episodes && (
-              <div className="flex items-center space-x-1">
+              <div className="flex items-center gap-1">
                 <Clock className="h-3 w-3" />
                 <span>{episodes} eps</span>
               </div>
             )}
           </div>
+          
           <Badge 
             variant="outline" 
             className={cn(
-              "text-xs px-2 py-0.5 flex items-center gap-1",
+              "text-xs px-2 py-0.5 flex items-center gap-1 w-fit",
               isDubbed ? "bg-purple-500/10 text-purple-400 border-purple-500/30" : "bg-blue-500/10 text-blue-400 border-blue-500/30"
             )}
           >

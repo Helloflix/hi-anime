@@ -90,7 +90,7 @@ const trendingAnimes = [
 
 const TrendingSection = () => {
   return (
-    <section className="py-6 md:py-12 bg-card/20">
+    <section className="py-4 md:py-8 lg:py-12">
       <div className="container px-3 md:px-4">
         {/* Section Header */}
         <div className="flex items-center justify-between mb-4 md:mb-8">
