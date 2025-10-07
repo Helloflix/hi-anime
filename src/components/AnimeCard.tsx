@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { Play, Star, Calendar, Clock } from "lucide-react";
+import { Play, Star, Calendar, Clock, Subtitles, Mic2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface AnimeCardProps {
   id: string;
@@ -15,6 +16,7 @@ interface AnimeCardProps {
   genres?: string[];
   subtitle?: string;
   className?: string;
+  isDubbed?: boolean;
 }
 
 const AnimeCard = ({ 
@@ -28,7 +30,8 @@ const AnimeCard = ({
   status, 
   genres = [],
   subtitle,
-  className = "" 
+  className = "",
+  isDubbed = false
 }: AnimeCardProps) => {
   return (
     <div className={`group relative anime-card overflow-hidden ${className}`}>
@@ -83,12 +86,6 @@ const AnimeCard = ({
           </h3>
         </Link>
 
-        {subtitle && (
-          <p className="text-xs text-muted-foreground line-clamp-1">
-            {subtitle}
-          </p>
-        )}
-
         {/* Meta Information */}
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center space-x-3">
@@ -105,32 +102,17 @@ const AnimeCard = ({
               </div>
             )}
           </div>
-          {type && (
-            <Badge variant="outline" className="text-xs px-1 py-0">
-              {type}
-            </Badge>
-          )}
-        </div>
-
-        {/* Genres */}
-        {genres.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {genres.slice(0, 2).map((genre, index) => (
-              <Badge 
-                key={index} 
-                variant="secondary" 
-                className="text-xs px-2 py-0 bg-accent/50"
-              >
-                {genre}
-              </Badge>
-            ))}
-            {genres.length > 2 && (
-              <Badge variant="secondary" className="text-xs px-2 py-0 bg-muted">
-                +{genres.length - 2}
-              </Badge>
+          <Badge 
+            variant="outline" 
+            className={cn(
+              "text-xs px-2 py-0.5 flex items-center gap-1",
+              isDubbed ? "bg-purple-500/10 text-purple-400 border-purple-500/30" : "bg-blue-500/10 text-blue-400 border-blue-500/30"
             )}
-          </div>
-        )}
+          >
+            {isDubbed ? <Mic2 className="h-3 w-3" /> : <Subtitles className="h-3 w-3" />}
+            <span>{isDubbed ? "DUB" : "SUB"}</span>
+          </Badge>
+        </div>
       </div>
     </div>
   );

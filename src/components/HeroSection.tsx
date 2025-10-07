@@ -133,11 +133,6 @@ const HeroSection = () => {
             </Badge>
           </div>
 
-          {/* Description */}
-          <p className="text-muted-foreground leading-relaxed max-w-xl">
-            {currentAnime.description}
-          </p>
-
           {/* Genres */}
           <div className="flex flex-wrap gap-2">
             {currentAnime.genres.map((genre, index) => (
