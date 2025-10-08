@@ -137,19 +137,32 @@ const WatchPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Episode Title */}
+            {/* Anime Title */}
             <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <Badge variant="secondary">Episode {anime.currentEpisode}</Badge>
-                <Badge variant="outline">{quality}</Badge>
-                <Badge variant="outline">{subtitle} Sub</Badge>
-              </div>
-              <h1 className="text-2xl md:text-3xl font-bold">
+              <h2 className="text-lg font-semibold text-muted-foreground">
                 {anime.title}
-              </h1>
-              <h2 className="text-lg text-muted-foreground">
-                {anime.episodeTitle}
               </h2>
+            </div>
+
+            {/* Episode Navigation */}
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="outline"
+                disabled={currentEpisode === 1}
+                onClick={() => setCurrentEpisode(Math.max(1, currentEpisode - 1))}
+              >
+                <SkipBack className="h-4 w-4 mr-2" />
+                Previous
+              </Button>
+              
+              <Button
+                variant="outline"
+                disabled={currentEpisode === anime.totalEpisodes}
+                onClick={() => setCurrentEpisode(Math.min(anime.totalEpisodes, currentEpisode + 1))}
+              >
+                Next
+                <SkipForward className="h-4 w-4 ml-2" />
+              </Button>
             </div>
 
             {/* Player Controls */}
@@ -178,48 +191,24 @@ const WatchPage = () => {
                 </SelectContent>
               </Select>
             </div>
-
-            {/* Episode Navigation */}
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="outline"
-                disabled={currentEpisode === 1}
-                onClick={() => setCurrentEpisode(Math.max(1, currentEpisode - 1))}
-              >
-                <SkipBack className="h-4 w-4 mr-2" />
-                Previous
-              </Button>
-              
-              <Button
-                variant="outline"
-                disabled={currentEpisode === anime.totalEpisodes}
-                onClick={() => setCurrentEpisode(Math.min(anime.totalEpisodes, currentEpisode + 1))}
-              >
-                Next
-                <SkipForward className="h-4 w-4 ml-2" />
-              </Button>
-            </div>
           </div>
 
-          {/* Episodes List */}
+          {/* Episodes Grid */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Episodes</h3>
             <div className="anime-card p-4 max-h-96 overflow-y-auto">
-              <div className="space-y-2">
+              <div className="grid grid-cols-6 gap-2">
                 {episodes.map((episodeNum) => (
                   <button
                     key={episodeNum}
                     onClick={() => setCurrentEpisode(episodeNum)}
-                    className={`w-full text-left p-3 rounded-lg transition-colors ${
+                    className={`aspect-square flex items-center justify-center rounded-md text-sm font-medium transition-all ${
                       episodeNum === currentEpisode
-                        ? 'bg-primary text-primary-foreground'
-                        : 'hover:bg-secondary'
+                        ? 'bg-primary text-primary-foreground shadow-lg scale-105'
+                        : 'bg-secondary hover:bg-secondary/80 hover:scale-105'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">Episode {episodeNum}</span>
-                      <span className="text-sm text-muted-foreground">24:30</span>
-                    </div>
+                    {episodeNum}
                   </button>
                 ))}
               </div>
