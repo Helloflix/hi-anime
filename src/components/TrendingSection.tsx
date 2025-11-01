@@ -1,94 +1,48 @@
+import { useState, useEffect } from "react";
 import { TrendingUp, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import AnimeCard from "./AnimeCard";
-
-// Import anime images
-import anime1 from "@/assets/anime1.jpg";
-import anime2 from "@/assets/anime2.jpg";
-import anime3 from "@/assets/anime3.jpg";
-import anime4 from "@/assets/anime4.jpg";
-import anime5 from "@/assets/anime5.jpg";
-import anime6 from "@/assets/anime6.jpg";
-import anime7 from "@/assets/anime7.jpg";
-import anime8 from "@/assets/anime8.jpg";
-
-const trendingAnimes = [
-  {
-    id: "one-piece",
-    title: "One Piece",
-    subtitle: "The Great Pirate Era continues...",
-    image: anime1,
-    rating: 9.2,
-    year: 2023,
-    episodes: 1000,
-    type: "TV",
-    status: "Ongoing",
-    genres: ["Adventure", "Comedy", "Action", "Shounen"]
-  },
-  {
-    id: "demon-slayer",
-    title: "Demon Slayer: Kimetsu no Yaiba",
-    subtitle: "The Fragrant Flow of Wisteria Flowers",
-    image: anime2,
-    rating: 9.1,
-    year: 2023,
-    episodes: 44,
-    type: "TV",
-    status: "Completed",
-    genres: ["Action", "Historical", "Supernatural", "Drama"]
-  },
-  {
-    id: "attack-on-titan",
-    title: "Attack on Titan Final Season",
-    subtitle: "The Final Season",
-    image: anime3,
-    rating: 9.5,
-    year: 2023,
-    episodes: 28,
-    type: "TV",
-    status: "Completed",
-    genres: ["Action", "Drama", "Fantasy", "Military"]
-  },
-  {
-    id: "jujutsu-kaisen",
-    title: "Jujutsu Kaisen Season 2",
-    subtitle: "Shibuya Incident Arc",
-    image: anime4,
-    rating: 9.0,
-    year: 2023,
-    episodes: 23,
-    type: "TV",
-    status: "Completed",
-    genres: ["Action", "School", "Supernatural", "Drama"]
-  },
-  {
-    id: "naruto-shippuden",
-    title: "Naruto: Shippuden",
-    subtitle: "The Will of Fire Burns On",
-    image: anime5,
-    rating: 8.8,
-    year: 2023,
-    episodes: 500,
-    type: "TV",
-    status: "Completed",
-    genres: ["Action", "Martial Arts", "Comedy", "Shounen"]
-  },
-  {
-    id: "my-hero-academia",
-    title: "My Hero Academia Season 7",
-    subtitle: "Plus Ultra!",
-    image: anime6,
-    rating: 8.9,
-    year: 2024,
-    episodes: 25,
-    type: "TV",
-    status: "Ongoing",
-    genres: ["Action", "School", "Superhero", "Comedy"]
-  },
-];
+import { getHomeData } from "@/services/animeApi";
+import type { AnimeBasic } from "@/types/anime";
 
 const TrendingSection = () => {
+  const [trending, setTrending] = useState<AnimeBasic[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTrending = async () => {
+      try {
+        const data = await getHomeData();
+        setTrending(data.trending || []);
+      } catch (error) {
+        console.error('Failed to fetch trending data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrending();
+  }, []);
+
+  if (loading) {
+    return (
+      <section className="py-4 md:py-8 lg:py-12">
+        <div className="container px-3 md:px-4">
+          <div className="flex items-center justify-between mb-4 md:mb-8">
+            <Skeleton className="h-10 w-48" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <Skeleton key={i} className="aspect-[2/3] w-full" />
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
   return (
     <section className="py-4 md:py-8 lg:py-12">
       <div className="container px-3 md:px-4">
@@ -114,19 +68,40 @@ const TrendingSection = () => {
 
         {/* Trending Grid - Responsive: 2 mobile, 4 tablet, 6 desktop */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-          {trendingAnimes.map((anime, index) => (
-            <div key={anime.id} className="relative group">
-              {/* Rank Number */}
-              <div className="absolute -top-1.5 -left-1.5 md:-top-2 md:-left-2 z-10 flex items-center justify-center w-6 h-6 md:w-8 md:h-8 rounded-full bg-primary text-primary-foreground font-bold text-xs md:text-sm shadow-lg">
-                {String(index + 1).padStart(2, '0')}
+          {trending.map((anime, index) => {
+            const hasEpisodeInfo = anime.tvInfo?.episodeInfo;
+            const subCount = hasEpisodeInfo ? anime.tvInfo.episodeInfo.sub : anime.tvInfo?.sub || 0;
+            const dubCount = hasEpisodeInfo ? anime.tvInfo.episodeInfo.dub : anime.tvInfo?.dub || 0;
+            const totalEpisodes = anime.tvInfo?.eps || subCount + dubCount;
+            
+            // Extract year from releaseDate if available
+            const yearMatch = anime.tvInfo?.releaseDate?.match(/(\d{4})/);
+            const yearNumber = yearMatch ? parseInt(yearMatch[1]) : undefined;
+
+            return (
+              <div key={anime.id} className="relative group">
+                {/* Rank Number */}
+                <div className="absolute -top-1.5 -left-1.5 md:-top-2 md:-left-2 z-10 flex items-center justify-center w-6 h-6 md:w-8 md:h-8 rounded-full bg-primary text-primary-foreground font-bold text-xs md:text-sm shadow-lg">
+                  {String(index + 1).padStart(2, '0')}
+                </div>
+                
+                <AnimeCard
+                  id={anime.id}
+                  title={anime.title}
+                  image={anime.poster}
+                  rating={0}
+                  year={yearNumber}
+                  episodes={totalEpisodes}
+                  type={anime.tvInfo?.showType || 'TV'}
+                  status="Ongoing"
+                  genres={[]}
+                  subtitle={subCount > 0 ? 'SUB' : undefined}
+                  isDubbed={dubCount > 0}
+                  className="h-full"
+                />
               </div>
-              
-              <AnimeCard
-                {...anime}
-                className="h-full"
-              />
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Mobile View All Button */}

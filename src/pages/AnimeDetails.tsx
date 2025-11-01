@@ -1,65 +1,72 @@
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import { Play, Star, Calendar, Clock, BookOpen, Users, Eye } from "lucide-react";
+import { Play, Star, BookOpen, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-
-// Import anime images
-import anime1 from "@/assets/anime1.jpg";
+import { Skeleton } from "@/components/ui/skeleton";
+import { getAnimeDetails } from "@/services/animeApi";
+import type { AnimeDetails as AnimeDetailsType } from "@/types/anime";
 
 const AnimeDetails = () => {
   const { id } = useParams<{ id: string }>();
+  const [anime, setAnime] = useState<AnimeDetailsType | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Mock anime data - in real app this would come from API
-  const anime = {
-    id: id || "1",
-    title: "My Dress-Up Darling Season 2",
-    originalTitle: "Sono Bisque Doll wa Koi wo Suru Season 2",
-    image: anime1,
-    rating: 8.5,
-    year: 2025,
-    episodes: 24,
-    duration: "24 min per ep",
-    status: "Ongoing",
-    studio: "Studio Trigger",
-    source: "Manga",
-    genres: ["Romance", "Comedy", "School", "Slice of Life"],
-    description: "The second season of Sono Bisque Doll wa Koi wo Suru. When Marin Kitagawa and Wakana Gojo met, they grew close over their love for cosplay. Through interacting with classmates and making new cosplay friends, Marin and Wakana's world keeps growing. New developments arise as Marin's love for Wakana grows stronger, leading to heartwarming and comedic situations as they navigate their relationship while pursuing their passion for cosplay.",
-    views: "2.5M",
-    favorites: "150K",
-    completed: "89K"
-  };
+  useEffect(() => {
+    const fetchDetails = async () => {
+      if (!id) return;
+      try {
+        const data = await getAnimeDetails(id);
+        setAnime(data.data);
+      } catch (error) {
+        console.error('Failed to fetch anime details:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDetails();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen">
+        <Skeleton className="h-[60vh] w-full" />
+        <div className="container px-4 py-8">
+          <Skeleton className="h-8 w-3/4 mb-4" />
+          <Skeleton className="h-40 w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!anime) return <div className="container px-4 py-8">Anime not found</div>;
 
   return (
     <div className="min-h-screen">
+      <div className="container px-4 py-4">
+        <Button variant="ghost" asChild>
+          <Link to="/">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Home
+          </Link>
+        </Button>
+      </div>
+
       {/* Hero Section */}
       <div className="relative h-[60vh] overflow-hidden">
-        <img
-          src={anime.image}
-          alt={anime.title}
-          className="w-full h-full object-cover"
-        />
+        <img src={anime.poster} alt={anime.title} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
         
         <div className="absolute bottom-0 left-0 right-0 p-8">
           <div className="container">
             <div className="max-w-3xl space-y-4">
-              <div className="flex items-center space-x-2">
-                <Badge className="bg-primary/20 text-primary border-primary/30">
-                  {anime.status}
-                </Badge>
-                <Badge variant="outline">
-                  {anime.year}
-                </Badge>
-              </div>
-              
-              <h1 className="text-4xl md:text-6xl font-bold text-glow">
-                {anime.title}
-              </h1>
-              
-              <p className="text-lg text-muted-foreground">
-                {anime.originalTitle}
-              </p>
+              <Badge className="bg-primary/20 text-primary border-primary/30">
+                {anime.animeInfo.Status}
+              </Badge>
+              <h1 className="text-4xl md:text-6xl font-bold">{anime.title}</h1>
+              <p className="text-lg text-muted-foreground">{anime.japanese_title}</p>
             </div>
           </div>
         </div>
@@ -68,118 +75,46 @@ const AnimeDetails = () => {
       {/* Content */}
       <div className="container px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Action Buttons */}
-            <div className="flex flex-wrap items-center gap-4">
-              <Button size="lg" className="bg-primary hover:bg-primary/90" asChild>
-                <Link to={`/watch/${anime.id}`}>
-                  <Play className="h-5 w-5 mr-2" />
-                  Watch Now
-                </Link>
-              </Button>
-              <Button variant="outline" size="lg">
-                <BookOpen className="h-5 w-5 mr-2" />
-                Add to List
-              </Button>
-            </div>
+            <Button size="lg" className="bg-primary hover:bg-primary/90" asChild>
+              <Link to={`/watch/${id}`}>
+                <Play className="h-5 w-5 mr-2" />
+                Watch Now
+              </Link>
+            </Button>
 
-            {/* Description */}
             <div className="space-y-4">
               <h2 className="text-2xl font-bold">Synopsis</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                {anime.description}
-              </p>
+              <p className="text-muted-foreground leading-relaxed">{anime.animeInfo.Overview}</p>
             </div>
 
             <div className="space-y-4">
               <h3 className="text-xl font-semibold">Genres</h3>
               <div className="flex flex-wrap gap-2">
-                {anime.genres.map((genre, index) => (
-                  <Link 
-                    key={index} 
-                    to={`/genre/${genre.toLowerCase().replace(' ', '-')}`}
-                    className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-accent/50 text-accent-foreground hover:bg-accent transition-colors"
-                  >
-                    {genre}
-                  </Link>
+                {anime.animeInfo.Genres.map((genre, index) => (
+                  <Badge key={index} variant="secondary">{genre.name}</Badge>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Sidebar */}
           <div className="space-y-6">
-            {/* Stats Card */}
             <div className="anime-card p-6 space-y-4">
               <h3 className="text-lg font-semibold">Information</h3>
-              
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Rating</span>
-                  <div className="flex items-center space-x-1">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-medium">{anime.rating}</span>
-                  </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Score</span>
+                  <span className="font-medium">{anime.animeInfo["MAL Score"]}</span>
                 </div>
-                
                 <Separator />
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Episodes</span>
-                  <span className="font-medium">{anime.episodes}</span>
-                </div>
-                
-                <Separator />
-                
-                <div className="flex items-center justify-between">
+                <div className="flex justify-between">
                   <span className="text-muted-foreground">Duration</span>
-                  <span className="font-medium">{anime.duration}</span>
+                  <span className="font-medium">{anime.animeInfo.Duration}</span>
                 </div>
-                
                 <Separator />
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Studio</span>
-                  <span className="font-medium">{anime.studio}</span>
-                </div>
-                
-                <Separator />
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Source</span>
-                  <span className="font-medium">{anime.source}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Stats */}
-            <div className="anime-card p-6 space-y-4">
-              <h3 className="text-lg font-semibold">Statistics</h3>
-              
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Eye className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">Views</span>
-                  </div>
-                  <span className="font-medium">{anime.views}</span>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">Favorites</span>
-                  </div>
-                  <span className="font-medium">{anime.favorites}</span>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <BookOpen className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">Completed</span>
-                  </div>
-                  <span className="font-medium">{anime.completed}</span>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Studios</span>
+                  <span className="font-medium">{anime.animeInfo.Studios}</span>
                 </div>
               </div>
             </div>

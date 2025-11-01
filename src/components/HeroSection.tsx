@@ -3,88 +3,75 @@ import { Link } from "react-router-dom";
 import { Play, Info, Star, Calendar, Zap, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import heroImage from "@/assets/anime-hero.jpg";
-
-interface HeroAnime {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  rating: number;
-  year: number;
-  episodes: number;
-  genres: string[];
-  status: string;
-}
-
-const heroAnimes: HeroAnime[] = [
-  {
-    id: "1",
-    title: "My Dress-Up Darling Season 2",
-    description: "The second season of Sono Bisque Doll wa Koi wo Suru. When Marin Kitagawa and Wakana Gojo met, they grew close over their love for cosplay. Through interacting with classmates and making new cosplay friends, Marin and Wakana's world keeps growing. New developments arise as Marin's love for Wakana grows.",
-    image: heroImage,
-    rating: 8.5,
-    year: 2025,
-    episodes: 24,
-    genres: ["Romance", "Comedy", "School", "Slice of Life"],
-    status: "Ongoing"
-  },
-  {
-    id: "2", 
-    title: "Jujutsu Kaisen Season 3",
-    description: "The highly anticipated third season continues the adventures of Yuji Itadori and his fellow sorcerers as they face even more powerful curses and uncover dark secrets about the jujutsu world.",
-    image: heroImage,
-    rating: 9.2,
-    year: 2025,
-    episodes: 24,
-    genres: ["Action", "Supernatural", "School", "Drama"],
-    status: "Coming Soon"
-  },
-  {
-    id: "3",
-    title: "Demon Slayer: Infinity Castle Arc",
-    description: "Tanjiro and his companions enter the final battle against Muzan and the Upper Moons in this climactic arc of the beloved demon-slaying saga.",
-    image: heroImage,
-    rating: 9.5,
-    year: 2025,
-    episodes: 12,
-    genres: ["Action", "Historical", "Supernatural", "Drama"],
-    status: "Coming Soon"
-  }
-];
+import { Skeleton } from "@/components/ui/skeleton";
+import { getHomeData } from "@/services/animeApi";
+import type { AnimeBasic } from "@/types/anime";
 
 const HeroSection = () => {
+  const [spotlights, setSpotlights] = useState<AnimeBasic[]>([]);
+  const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
-  const currentAnime = heroAnimes[currentSlide];
+  useEffect(() => {
+    const fetchHomeData = async () => {
+      try {
+        const data = await getHomeData();
+        setSpotlights(data.spotlights || []);
+      } catch (error) {
+        console.error('Failed to fetch home data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHomeData();
+  }, []);
 
   useEffect(() => {
-    if (!isAutoPlaying) return;
+    if (!isAutoPlaying || spotlights.length === 0) return;
     
     const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroAnimes.length);
+      setCurrentSlide((prev) => (prev + 1) % spotlights.length);
     }, 6000);
 
     return () => clearInterval(interval);
-  }, [isAutoPlaying]);
+  }, [isAutoPlaying, spotlights.length]);
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev + 1) % heroAnimes.length);
+    if (spotlights.length === 0) return;
+    setCurrentSlide((prev) => (prev + 1) % spotlights.length);
     setIsAutoPlaying(false);
   };
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev - 1 + heroAnimes.length) % heroAnimes.length);
+    if (spotlights.length === 0) return;
+    setCurrentSlide((prev) => (prev - 1 + spotlights.length) % spotlights.length);
     setIsAutoPlaying(false);
   };
+
+  if (loading) {
+    return (
+      <section className="relative min-h-[60vh] md:min-h-[70vh] lg:min-h-[80vh] flex items-center overflow-hidden">
+        <Skeleton className="absolute inset-0" />
+      </section>
+    );
+  }
+
+  if (spotlights.length === 0) return null;
+
+  const currentAnime = spotlights[currentSlide];
+  const hasValidEpisodeInfo = currentAnime?.tvInfo?.episodeInfo;
+  const episodeCount = hasValidEpisodeInfo 
+    ? (currentAnime.tvInfo.episodeInfo.sub || 0) + (currentAnime.tvInfo.episodeInfo.dub || 0)
+    : currentAnime?.tvInfo?.eps || 0;
 
   return (
     <section className="relative min-h-[60vh] md:min-h-[70vh] lg:min-h-[80vh] flex items-center overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0">
         <img
-          src={currentAnime.image}
+          src={currentAnime.poster}
           alt={currentAnime.title}
           className="w-full h-full object-cover"
         />
@@ -109,42 +96,33 @@ const HeroSection = () => {
           </h1>
 
           {/* Meta Info */}
-          <div className="flex items-center space-x-6 text-sm">
-            <div className="flex items-center space-x-1">
-              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-              <span className="font-medium">{currentAnime.rating}</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Calendar className="h-4 w-4" />
-              <span>{currentAnime.year}</span>
-            </div>
-            <Badge variant="outline" className="bg-card/50 backdrop-blur-sm">
-              {currentAnime.episodes} episodes
-            </Badge>
-            <Badge 
-              variant="secondary" 
-              className={`${
-                currentAnime.status === 'Ongoing' 
-                  ? 'bg-green-500/20 text-green-400 border-green-500/30' 
-                  : 'bg-blue-500/20 text-blue-400 border-blue-500/30'
-              }`}
-            >
-              {currentAnime.status}
-            </Badge>
+          <div className="flex items-center flex-wrap gap-3 text-sm">
+            {currentAnime.tvInfo?.quality && (
+              <Badge className="bg-primary/20 text-primary border-primary/30">
+                {currentAnime.tvInfo.quality}
+              </Badge>
+            )}
+            {currentAnime.tvInfo?.showType && (
+              <Badge variant="outline" className="bg-card/50 backdrop-blur-sm">
+                {currentAnime.tvInfo.showType}
+              </Badge>
+            )}
+            {episodeCount > 0 && (
+              <Badge variant="outline" className="bg-card/50 backdrop-blur-sm">
+                {episodeCount} episodes
+              </Badge>
+            )}
+            {currentAnime.tvInfo?.duration && (
+              <span className="text-muted-foreground">{currentAnime.tvInfo.duration}</span>
+            )}
           </div>
 
-          {/* Genres */}
-          <div className="flex flex-wrap gap-2">
-            {currentAnime.genres.map((genre, index) => (
-              <Link
-                key={index}
-                to={`/genre/${genre.toLowerCase().replace(' ', '-')}`}
-                className="px-3 py-1 text-xs rounded-full bg-accent/50 hover:bg-accent transition-colors"
-              >
-                {genre}
-              </Link>
-            ))}
-          </div>
+          {/* Description */}
+          {currentAnime.description && (
+            <p className="text-sm md:text-base text-muted-foreground line-clamp-3">
+              {currentAnime.description}
+            </p>
+          )}
 
           {/* Action Buttons */}
           <div className="flex items-center space-x-3 pt-2 md:pt-4">
@@ -193,7 +171,7 @@ const HeroSection = () => {
 
       {/* Slide Indicators */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
-        {heroAnimes.map((_, index) => (
+        {spotlights.map((_, index) => (
           <button
             key={index}
             className={`w-3 h-3 rounded-full transition-all ${
