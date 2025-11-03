@@ -73,15 +73,17 @@ const HeroSection = () => {
         <img
           src={currentAnime.poster}
           alt={currentAnime.title}
+          loading="eager"
+          fetchPriority="high"
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 container max-w-7xl px-4 py-10 md:py-16 lg:py-20 mx-auto">
-        <div className="max-w-2xl space-y-4 md:space-y-6 animate-slide-up">
+      <div className="relative z-10 container max-w-7xl px-4 md:px-6 py-8 md:py-16 lg:py-20 mx-auto">
+        <div className="max-w-2xl space-y-3 md:space-y-5 animate-slide-up">
           {/* Spotlight Badge */}
           <div className="flex items-center space-x-2">
             <Badge className="bg-primary/20 text-primary border-primary/30 animate-glow-pulse">
@@ -91,7 +93,7 @@ const HeroSection = () => {
           </div>
 
           {/* Title */}
-          <h1 className="text-4xl md:text-6xl font-bold leading-tight text-glow">
+          <h1 className="text-3xl md:text-5xl lg:text-5xl font-bold leading-tight text-glow">
             {currentAnime.title}
           </h1>
 
@@ -119,7 +121,7 @@ const HeroSection = () => {
 
           {/* Description */}
           {currentAnime.description && (
-            <p className="text-sm md:text-base text-muted-foreground line-clamp-3">
+            <p className="text-sm md:text-base text-muted-foreground line-clamp-2 md:line-clamp-3 max-w-xl">
               {currentAnime.description}
             </p>
           )}

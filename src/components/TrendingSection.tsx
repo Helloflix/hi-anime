@@ -35,7 +35,7 @@ const TrendingSection = () => {
             <Skeleton className="h-10 w-32" />
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-            {Array.from({ length: 12 }).map((_, i) => (
+            {Array.from({ length: 18 }).map((_, i) => (
               <Skeleton key={i} className="aspect-[2/3] w-full" />
             ))}
           </div>
@@ -67,8 +67,8 @@ const TrendingSection = () => {
         </div>
 
         {/* Trending Grid - Responsive: 2 mobile, 4 tablet, 6 desktop */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-          {trending.map((anime, index) => {
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4 lg:gap-5">
+          {trending.slice(0, 18).map((anime, index) => {
             const hasEpisodeInfo = anime.tvInfo?.episodeInfo;
             const subCount = hasEpisodeInfo ? anime.tvInfo.episodeInfo.sub : anime.tvInfo?.sub || 0;
             const dubCount = hasEpisodeInfo ? anime.tvInfo.episodeInfo.dub : anime.tvInfo?.dub || 0;

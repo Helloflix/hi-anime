@@ -135,6 +135,10 @@ All colors MUST be HSL.
     @apply bg-background text-foreground font-sans transition-colors duration-300;
     background: var(--hero-gradient);
     min-height: 100vh;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   /* Custom scrollbar for anime theme */
@@ -164,10 +168,11 @@ All colors MUST be HSL.
     border-radius: var(--radius);
     transition: var(--transition-smooth);
     box-shadow: var(--shadow-card);
+    will-change: transform;
   }
 
   .anime-card:hover {
-    transform: translateY(-3px);
+    transform: translateY(-4px);
     box-shadow: var(--shadow-glow);
     border-color: hsl(var(--primary) / 0.6);
   }

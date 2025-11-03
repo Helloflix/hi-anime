@@ -36,19 +36,21 @@ const AnimeCard = ({
   return (
     <div className={`group relative anime-card overflow-hidden ${className}`}>
       {/* Image Container */}
-      <div className="relative aspect-[3/4] overflow-hidden">
+      <div className="relative aspect-[3/4] overflow-hidden bg-muted">
         <img
           src={image}
           alt={title}
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
         />
         
         {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
+        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
           <div className="absolute bottom-4 left-4 right-4">
             <Button
               size="sm"
-              className="w-full mb-2 bg-primary hover:bg-primary/90 text-primary-foreground h-8 text-xs"
+              className="w-full mb-2 bg-primary hover:bg-primary/90 text-primary-foreground h-8 text-xs shadow-lg"
               asChild
             >
               <Link to={`/watch/${id}`}>
@@ -79,9 +81,9 @@ const AnimeCard = ({
       </div>
 
       {/* Content */}
-      <div className="p-4 space-y-2">
+      <div className="p-3 space-y-2">
         <Link to={`/anime/${id}`} className="block">
-          <h3 className="font-semibold text-sm leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+          <h3 className="font-semibold text-sm leading-tight line-clamp-2 group-hover:text-primary transition-colors duration-200">
             {title}
           </h3>
         </Link>
