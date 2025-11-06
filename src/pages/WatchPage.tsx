@@ -60,11 +60,12 @@ const WatchPage = () => {
   const currentEpisode = episodes[currentIndex];
 
   const selectedStream: StreamLink | undefined = useMemo(() => {
-    if (!streamingLinks || !Array.isArray(streamingLinks) || streamingLinks.length === 0) return undefined;
-    const m3u8 = streamingLinks.find((s) =>
+    const linksArr = Array.isArray(streamingLinks) ? streamingLinks : [];
+    if (linksArr.length === 0) return undefined;
+    const m3u8 = linksArr.find((s) =>
       (s.link?.type || "").toLowerCase().includes("m3u8") || (s.link?.type || "").toLowerCase().includes("mpegurl")
     );
-    return m3u8 || streamingLinks[0];
+    return m3u8 || linksArr[0];
   }, [streamingLinks]);
 
   // Load streaming when episode/server/type changes
