@@ -60,7 +60,7 @@ const WatchPage = () => {
   const currentEpisode = episodes[currentIndex];
 
   const selectedStream: StreamLink | undefined = useMemo(() => {
-    if (!streamingLinks || streamingLinks.length === 0) return undefined;
+    if (!streamingLinks || !Array.isArray(streamingLinks) || streamingLinks.length === 0) return undefined;
     const m3u8 = streamingLinks.find((s) =>
       (s.link?.type || "").toLowerCase().includes("m3u8") || (s.link?.type || "").toLowerCase().includes("mpegurl")
     );
@@ -84,7 +84,8 @@ const WatchPage = () => {
             setCurrentServer(names[0]);
           }
         }
-        setStreamingLinks(info.streamingLink || []);
+        const links = info.streamingLink || [];
+        setStreamingLinks(Array.isArray(links) ? links : []);
       } catch (e) {
         console.error("Failed to load streaming info", e);
         setStreamingLinks([]);
