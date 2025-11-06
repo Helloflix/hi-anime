@@ -156,11 +156,15 @@ const VideoPlayer = ({
               <SelectValue placeholder="Select Server" />
             </SelectTrigger>
             <SelectContent>
-              {availableServers.map((server) => (
-                <SelectItem key={server.server_id} value={server.server_id.toString()}>
-                  {server.server_name || server.serverName || `Server ${server.server_id}`}
-                </SelectItem>
-              ))}
+              {availableServers.map((server) => {
+                const name = server.server_name || server.serverName || `Server ${server.server_id}`;
+                const slug = name.toString().toLowerCase().replace(/\s+/g, '-');
+                return (
+                  <SelectItem key={slug} value={slug}>
+                    {name}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         )}
@@ -180,7 +184,7 @@ const VideoPlayer = ({
               crossOrigin="anonymous"
               onClick={togglePlay}
             >
-              <source src={streamingData.link.file} type={streamingData.link.type || 'application/x-mpegURL'} />
+              <source src={getProxiedUrl(streamingData.link.file)} type={streamingData.link.type || 'application/x-mpegURL'} />
               {streamingData.tracks?.map((track, index) => (
                 <track
                   key={index}
