@@ -44,53 +44,53 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/20 bg-background/60 backdrop-blur-xl supports-[backdrop-filter]:bg-background/40">
-      <div className="flex h-14 md:h-12 lg:h-16 items-center px-3 md:px-3 lg:px-4 gap-2 md:gap-3 lg:gap-4">
-        {/* Sidebar Toggle - visible on all screens */}
-        <SidebarTrigger className="h-10 w-10 md:h-9 md:w-9 lg:h-10 lg:w-10" />
+      <div className="flex h-14 md:h-12 lg:h-16 items-center px-3 md:px-3 lg:px-4 gap-2 md:gap-2 lg:gap-4">
+        {/* Sidebar Toggle */}
+        <SidebarTrigger className="h-9 w-9 md:h-8 md:w-8 lg:h-10 lg:w-10 flex-shrink-0" />
         
         {/* Animated Logo - visible on mobile and tablet */}
-        <Link to="/" className="flex items-center space-x-1.5 lg:hidden">
-          <span className="font-bold text-base md:text-sm lg:text-lg bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent animate-pulse">
+        <Link to="/" className="flex items-center lg:hidden flex-shrink-0">
+          <span className="font-bold text-sm md:text-xs lg:text-lg bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent animate-pulse">
             AnimixPlay
           </span>
         </Link>
 
-        {/* Search Bar - More compact on tablet */}
-        <form onSubmit={handleSearch} className="flex-1 max-w-xl">
+        {/* Search Bar */}
+        <form onSubmit={handleSearch} className="flex-1 min-w-0">
           <div className="relative">
-            <Search className="absolute left-2 md:left-2.5 lg:left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 md:h-4.5 md:w-4.5 lg:h-5 lg:w-5 text-muted-foreground" />
+            <Search className="absolute left-2 md:left-2.5 lg:left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 md:h-4 md:w-4 lg:h-5 lg:w-5 text-muted-foreground" />
             <Input
               type="search"
               placeholder="Search anime..."
-              className="pl-8 md:pl-9 lg:pl-10 bg-muted/50 h-9 md:h-8 lg:h-10 text-sm"
+              className="pl-7 md:pl-8 lg:pl-10 bg-muted/50 h-8 md:h-8 lg:h-10 text-xs md:text-sm w-full"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
         </form>
 
-        {/* Action Buttons - Compact on tablet */}
-        <div className="flex items-center space-x-1 md:space-x-1 lg:space-x-2 relative">
+        {/* Action Buttons - Right aligned and compact */}
+        <div className="flex items-center gap-1 md:gap-1 lg:gap-2 flex-shrink-0 ml-auto relative">
           <ThemeToggle />
           {user ? (
             <>
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="h-10 md:h-9 lg:h-10 px-2 md:px-2 lg:px-3"
+                className="h-8 w-8 md:h-8 md:w-8 lg:h-10 lg:w-auto lg:px-3 p-0 lg:p-2"
                 onClick={() => setShowProfile(!showProfile)}
               >
-                <Avatar className="h-8 w-8 md:h-7 md:w-7 lg:h-8 lg:w-8">
-                  <AvatarFallback className="bg-primary text-primary-foreground text-sm">
+                <Avatar className="h-7 w-7 md:h-7 md:w-7 lg:h-8 lg:w-8">
+                  <AvatarFallback className="bg-primary text-primary-foreground text-xs md:text-xs lg:text-sm">
                     {user.email?.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-                <span className="hidden lg:inline ml-2">Profile</span>
+                <span className="hidden lg:inline ml-2 text-sm">Profile</span>
               </Button>
               
               {/* Animated Profile Dropdown */}
               {showProfile && (
-                <div className="absolute right-0 top-full mt-2 w-72 bg-card border border-border rounded-lg shadow-xl animate-slide-up overflow-hidden">
+                <div className="absolute right-0 top-full mt-2 w-64 md:w-72 bg-card border border-border rounded-lg shadow-xl animate-slide-up overflow-hidden z-50">
                   <div className="p-4 bg-gradient-to-br from-primary/10 to-primary/5 border-b border-border">
                     <div className="flex items-center space-x-3">
                       <Avatar className="h-12 w-12">
@@ -142,10 +142,13 @@ const Header = () => {
               )}
             </>
           ) : (
-            <Button variant="ghost" size="sm" className="h-10 md:h-9 lg:h-10 px-2 md:px-2 lg:px-3" asChild>
-              <Link to="/auth">
-                <span className="text-sm md:text-sm lg:text-sm">Login</span>
-              </Link>
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="h-8 md:h-8 lg:h-10 px-3 md:px-3 lg:px-4 text-xs md:text-xs lg:text-sm font-medium"
+              asChild
+            >
+              <Link to="/auth">Login</Link>
             </Button>
           )}
         </div>
