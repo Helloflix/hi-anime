@@ -68,15 +68,24 @@ const HeroSection = () => {
 
   return (
     <section className="relative min-h-[60vh] md:min-h-[70vh] lg:min-h-[80vh] flex items-center overflow-hidden">
-      {/* Background Image */}
+      {/* Background Images with Smooth Transition */}
       <div className="absolute inset-0">
-        <img
-          src={currentAnime.poster}
-          alt={currentAnime.title}
-          loading="eager"
-          fetchPriority="high"
-          className="w-full h-full object-cover"
-        />
+        {spotlights.map((anime, index) => (
+          <div
+            key={anime.id}
+            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
+              index === currentSlide ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <img
+              src={anime.poster}
+              alt={anime.title}
+              loading={index === 0 ? "eager" : "lazy"}
+              fetchPriority={index === 0 ? "high" : "auto"}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ))}
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/20" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
       </div>
