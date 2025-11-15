@@ -86,8 +86,8 @@ const HeroSection = () => {
             />
           </div>
         ))}
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-background/10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
       </div>
 
       {/* Content */}
@@ -102,59 +102,59 @@ const HeroSection = () => {
           </div>
 
           {/* Title */}
-          <h1 className="text-3xl md:text-5xl lg:text-5xl font-bold leading-tight text-glow">
+          <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold leading-tight text-glow">
             {currentAnime.title}
           </h1>
 
           {/* Meta Info */}
-          <div className="flex items-center flex-wrap gap-3 text-sm">
+          <div className="flex items-center flex-wrap gap-2 text-xs sm:text-sm">
             {currentAnime.tvInfo?.quality && (
-              <Badge className="bg-primary/20 text-primary border-primary/30">
+              <Badge className="bg-primary/20 text-primary border-primary/30 text-xs">
                 {currentAnime.tvInfo.quality}
               </Badge>
             )}
             {currentAnime.tvInfo?.showType && (
-              <Badge variant="outline" className="bg-card/50 backdrop-blur-sm">
+              <Badge variant="outline" className="bg-card/50 backdrop-blur-sm text-xs">
                 {currentAnime.tvInfo.showType}
               </Badge>
             )}
             {episodeCount > 0 && (
-              <Badge variant="outline" className="bg-card/50 backdrop-blur-sm">
+              <Badge variant="outline" className="bg-card/50 backdrop-blur-sm text-xs">
                 {episodeCount} episodes
               </Badge>
             )}
             {currentAnime.tvInfo?.duration && (
-              <span className="text-muted-foreground">{currentAnime.tvInfo.duration}</span>
+              <span className="text-muted-foreground hidden sm:inline">{currentAnime.tvInfo.duration}</span>
             )}
           </div>
 
           {/* Description */}
           {currentAnime.description && (
-            <p className="text-sm md:text-base text-muted-foreground line-clamp-2 md:line-clamp-3 max-w-xl">
+            <p className="text-xs sm:text-sm md:text-base text-muted-foreground line-clamp-2 md:line-clamp-3 max-w-xl hidden sm:block">
               {currentAnime.description}
             </p>
           )}
 
           {/* Action Buttons */}
-          <div className="flex items-center space-x-3 pt-2 md:pt-4">
+          <div className="flex items-center space-x-2 sm:space-x-3 pt-2 md:pt-4">
             <Button 
-              size="default"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold animate-glow-pulse h-9 md:h-10 text-sm"
+              size="sm"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold animate-glow-pulse h-8 sm:h-9 md:h-10 text-xs sm:text-sm"
               asChild
             >
               <Link to={`/watch/${currentAnime.id}`}>
-                <Play className="h-4 w-4 mr-2" />
-                Watch Now
+                <Play className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                Watch
               </Link>
             </Button>
             <Button 
               variant="outline" 
-              size="default"
-              className="bg-card/50 backdrop-blur-sm border-border hover:bg-card/70 h-9 md:h-10 text-sm"
+              size="sm"
+              className="bg-card/50 backdrop-blur-sm border-border hover:bg-card/70 h-8 sm:h-9 md:h-10 text-xs sm:text-sm"
               asChild
             >
               <Link to={`/anime/${currentAnime.id}`}>
-                <Info className="h-4 w-4 mr-2" />
+                <Info className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                 Details
               </Link>
             </Button>
