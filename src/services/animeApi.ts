@@ -21,8 +21,8 @@ export const getHomeData = async (): Promise<HomeData> => {
   }
 };
 
-// Get anime details by ID
-export const getAnimeDetails = async (id: string): Promise<{ data: AnimeDetails }> => {
+// Get anime details by ID (returns full response with seasons and related data)
+export const getAnimeDetails = async (id: string): Promise<any> => {
   try {
     const response = await api.get(`/info?id=${id}`);
     return response.data.results;
