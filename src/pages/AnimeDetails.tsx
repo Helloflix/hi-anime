@@ -1,48 +1,124 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import { Play, Star, ArrowLeft, Calendar, Clock, TrendingUp, Award, Film, Users, Tag } from "lucide-react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { Play, Star, ArrowLeft, Calendar, Clock, Award, Film, Users, Tag, BookOpen, Tv, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAnimeDetails } from "@/services/animeApi";
 import type { AnimeDetails as AnimeDetailsType } from "@/types/anime";
 
+interface Season {
+  id: string;
+  data_number: number;
+  data_id: number;
+  season: string;
+  title: string;
+  japanese_title: string;
+  season_poster: string;
+}
+
+interface RelatedAnime {
+  duration: string;
+  data_id: number;
+  id: string;
+  title: string;
+  japanese_title: string;
+  poster: string;
+  tvInfo: {
+    dub: number;
+    sub: number;
+    showType: string;
+    eps: number;
+  };
+}
+
+interface AnimeDetailsResponse {
+  data: AnimeDetailsType;
+  seasons?: Season[];
+  related_data?: RelatedAnime[];
+}
+
 const AnimeDetails = () => {
   const { id } = useParams<{ id: string }>();
-  const [anime, setAnime] = useState<AnimeDetailsType | null>(null);
+  const navigate = useNavigate();
+  const [animeData, setAnimeData] = useState<AnimeDetailsResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  const fetchDetails = async () => {
+    if (!id) return;
+    setLoading(true);
+    setError(false);
+    try {
+      const response = await getAnimeDetails(id);
+      setAnimeData(response);
+    } catch (error) {
+      console.error('Failed to fetch anime details:', error);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchDetails = async () => {
-      if (!id) return;
-      try {
-        const data = await getAnimeDetails(id);
-        setAnime(data.data);
-      } catch (error) {
-        console.error('Failed to fetch anime details:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchDetails();
   }, [id]);
 
+  const anime = animeData?.data;
+
   if (loading) {
     return (
-      <div className="min-h-screen">
-        <Skeleton className="h-[60vh] w-full" />
+      <div className="min-h-screen bg-background">
+        <div className="container px-4 py-4">
+          <Skeleton className="h-10 w-32 mb-4" />
+        </div>
+        <Skeleton className="h-[50vh] w-full" />
         <div className="container px-4 py-8">
-          <Skeleton className="h-8 w-3/4 mb-4" />
-          <Skeleton className="h-40 w-full" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-4">
+              <Skeleton className="h-8 w-3/4" />
+              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-48 w-full" />
+            </div>
+            <div>
+              <Skeleton className="h-96 w-full" />
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
-  if (!anime) return <div className="container px-4 py-8">Anime not found</div>;
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="max-w-md w-full mx-4">
+          <CardContent className="pt-6 text-center">
+            <p className="text-destructive mb-4">Failed to load anime details</p>
+            <Button onClick={fetchDetails} variant="outline" size="sm" className="gap-2">
+              <RefreshCw className="h-4 w-4" />
+              Try Again
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!anime) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-4">Anime not found</p>
+          <Button onClick={() => navigate('/')} variant="outline" size="sm">
+            Back to Home
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
@@ -132,7 +208,7 @@ const AnimeDetails = () => {
               <CardContent className="p-4 md:p-6 space-y-4">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                    <TrendingUp className="h-4 w-4 text-primary" />
+                    <BookOpen className="h-4 w-4 text-primary" />
                   </div>
                   <h2 className="text-xl md:text-2xl font-bold">Synopsis</h2>
                 </div>
@@ -234,7 +310,7 @@ const AnimeDetails = () => {
                   {/* Status */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-muted-foreground">
-                      <TrendingUp className="h-4 w-4" />
+                      <Award className="h-4 w-4" />
                       <span className="text-sm">Status</span>
                     </div>
                     <Badge variant="outline">{anime.animeInfo.Status}</Badge>
