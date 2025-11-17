@@ -199,7 +199,7 @@ const AnimeDetails = () => {
           <div className="flex flex-wrap gap-3">
             {episodes.length > 0 && (
               <Button size="lg" className="gap-2" asChild>
-                <Link to={`/watch/${episodes[0].id}`}>
+                <Link to={`/watch/${id}?ep=${episodes[0].episode_no || 1}`}>
                   <Play className="h-5 w-5" />
                   Watch Episode 1
                 </Link>
@@ -254,7 +254,7 @@ const AnimeDetails = () => {
                       {episodes.slice(0, 20).map((episode) => (
                         <Link
                           key={episode.id}
-                          to={`/watch/${episode.id}`}
+                          to={`/watch/${id}?ep=${episode.episode_no}`}
                           className="group relative overflow-hidden rounded-lg border border-border/50 hover:border-primary/50 transition-all hover:shadow-lg"
                         >
                           <div className="aspect-video bg-muted/20 flex items-center justify-center relative">
