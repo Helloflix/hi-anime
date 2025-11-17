@@ -53,7 +53,7 @@ const AnimeCard = ({
               className="w-full mb-2 bg-primary hover:bg-primary/90 text-primary-foreground h-8 text-xs shadow-lg"
               asChild
             >
-              <Link to={`/watch/${id}`}>
+              <Link to={`/anime/${id}`}>
                 <Play className="h-3 w-3 mr-1" />
                 Watch Now
               </Link>
