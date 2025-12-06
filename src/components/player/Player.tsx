@@ -29,6 +29,7 @@ import "./Player.css";
 import getChapterStyles from "./getChapterStyle";
 import artplayerPluginHlsControl from "artplayer-plugin-hls-control";
 import artplayerPluginUploadSubtitle from "./artplayerPluginUploadSubtitle";
+import { PROXY_URL, M3U8_PROXY_URL } from "@/config/api";
 
 Artplayer.LOG_VERSION = false;
 Artplayer.CONTEXTMENU = false;
@@ -65,8 +66,8 @@ export default function Player({
   const artRef = useRef<HTMLDivElement>(null);
   const leftAtRef = useRef(0);
   const boundKeydownRef = useRef<any>(null);
-  const proxy = import.meta.env.VITE_PROXY_URL || "";
-  const m3u8proxy = import.meta.env.VITE_M3U8_PROXY_URL?.split(",") || [];
+  const proxy = PROXY_URL;
+  const m3u8proxy = M3U8_PROXY_URL.split(",");
   const [currentEpisodeIndex, setCurrentEpisodeIndex] = useState(
     episodes?.findIndex((episode: any) => episode.id.match(/ep=(\d+)/)?.[1] === episodeId)
   );
