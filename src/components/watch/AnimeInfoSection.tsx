@@ -168,15 +168,20 @@ const AnimeInfoSection = ({ anime, seasons, currentAnimeId }: AnimeInfoSectionPr
           {info?.Genres && info.Genres.length > 0 && (
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-sm text-muted-foreground">Genres:</span>
-              {info.Genres.map((genre, idx) => (
-                <Link
-                  key={idx}
-                  to={`/genre/${genre.name.toLowerCase()}`}
-                  className="text-sm text-primary hover:underline"
-                >
-                  {genre.name}
-                </Link>
-              ))}
+              {info.Genres.map((genre, idx) => {
+                // Handle both object format { name: string } and string format
+                const genreName = typeof genre === 'string' ? genre : genre?.name;
+                if (!genreName) return null;
+                return (
+                  <Link
+                    key={idx}
+                    to={`/genre/${genreName.toLowerCase().replace(/\s+/g, '-')}`}
+                    className="text-sm text-primary hover:underline"
+                  >
+                    {genreName}
+                  </Link>
+                );
+              })}
             </div>
           )}
 
