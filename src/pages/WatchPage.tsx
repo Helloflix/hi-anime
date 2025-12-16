@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { useParams, useSearchParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useSearchParams, Link } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Player from "@/components/player/Player";
@@ -8,8 +8,8 @@ import ServerSelector from "@/components/watch/ServerSelector";
 import WatchControls from "@/components/watch/WatchControls";
 import RelatedAnime from "@/components/watch/RelatedAnime";
 import AnimeInfoSection from "@/components/watch/AnimeInfoSection";
-import { getEpisodes, getStreamingInfo, getAnimeDetails } from "@/services/animeApi";
-import type { Episode, Server, StreamLink, AnimeBasic } from "@/types/anime";
+import { getEpisodes, getStreamingInfo, getAnimeDetails, getServers } from "@/services/animeApi";
+import type { Episode, Server, AnimeBasic } from "@/types/anime";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const slugifyServer = (name?: string) =>
@@ -18,7 +18,6 @@ const slugifyServer = (name?: string) =>
 const WatchPage = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
   const epParam = searchParams.get("ep");
 
   // Anime data states
@@ -75,15 +74,13 @@ const WatchPage = () => {
       setLoadingEpisodes(true);
       try {
         const data = await getEpisodes(id);
-        setEpisodes(data.episodes || []);
-        setTotalEpisodes(data.totalEpisodes || data.episodes?.length || 0);
+        const eps = data.episodes || [];
+        setEpisodes(eps);
+        setTotalEpisodes(data.totalEpisodes || eps.length);
 
         // Set initial episode from URL or default to 1
         const initialEp = epParam ? parseInt(epParam) : 1;
-        const validEp =
-          data.episodes?.find((ep) => ep.episode_no === initialEp)?.episode_no ||
-          data.episodes?.[0]?.episode_no ||
-          1;
+        const validEp = eps.find((ep) => ep.episode_no === initialEp)?.episode_no || eps[0]?.episode_no || 1;
         setCurrentEpisodeNo(validEp);
       } catch (error) {
         console.error("Failed to fetch episodes:", error);
@@ -101,30 +98,62 @@ const WatchPage = () => {
     }
   }, [currentEpisodeNo, setSearchParams]);
 
+  // The episode.id from the API is already in the correct format: "anime-id?ep=data-id"
+  const getEpisodeIdForApi = useCallback(() => {
+    if (!currentEpisode?.id) return null;
+    return currentEpisode.id;
+  }, [currentEpisode]);
+
+  // Fetch servers when episode changes
+  useEffect(() => {
+    const fetchServers = async () => {
+      const episodeApiId = getEpisodeIdForApi();
+      if (!episodeApiId) return;
+
+      try {
+        const serverList = await getServers(episodeApiId);
+        if (serverList && serverList.length > 0) {
+          setServers(serverList);
+          // Set default server based on available types
+          const subServers = serverList.filter((s) => s.type === "sub");
+          const dubServers = serverList.filter((s) => s.type === "dub");
+          
+          if (currentType === "sub" && subServers.length > 0) {
+            setCurrentServer(slugifyServer(subServers[0].server_name || subServers[0].serverName));
+          } else if (currentType === "dub" && dubServers.length > 0) {
+            setCurrentServer(slugifyServer(dubServers[0].server_name || dubServers[0].serverName));
+          } else if (subServers.length > 0) {
+            setCurrentType("sub");
+            setCurrentServer(slugifyServer(subServers[0].server_name || subServers[0].serverName));
+          } else if (dubServers.length > 0) {
+            setCurrentType("dub");
+            setCurrentServer(slugifyServer(dubServers[0].server_name || dubServers[0].serverName));
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch servers:", error);
+      }
+    };
+    fetchServers();
+  }, [currentEpisode?.id, getEpisodeIdForApi]);
+
   // Fetch streaming info when episode/server/type changes
   useEffect(() => {
     const fetchStream = async () => {
-      if (!currentEpisode?.id) return;
+      const episodeApiId = getEpisodeIdForApi();
+      if (!episodeApiId || !currentServer) return;
+
       setLoadingStream(true);
       try {
-        const info = await getStreamingInfo(
-          currentEpisode.id,
-          currentServer,
-          currentType
-        );
-
+        const info = await getStreamingInfo(episodeApiId, currentServer, currentType);
+        
+        // Update servers from stream response if available
         if (info.servers && info.servers.length > 0) {
           setServers(info.servers);
-          const availableForType = info.servers.filter((s) => s.type === currentType);
-          const names = availableForType.map((s) =>
-            slugifyServer(s.server_name || s.serverName)
-          );
-          if (names.length > 0 && !names.includes(currentServer)) {
-            setCurrentServer(names[0]);
-          }
         }
 
         setStreamingData(info);
+        console.log("Stream data loaded:", info);
       } catch (error) {
         console.error("Failed to fetch streaming info:", error);
         setStreamingData(null);
@@ -133,7 +162,7 @@ const WatchPage = () => {
       }
     };
     fetchStream();
-  }, [currentEpisode?.id, currentServer, currentType]);
+  }, [currentEpisode?.id, currentServer, currentType, getEpisodeIdForApi]);
 
   // Episode navigation handlers
   const handleEpisodeChange = useCallback((episodeNo: number) => {
@@ -255,7 +284,7 @@ const WatchPage = () => {
                   episodeId={String(currentEpisodeNo)}
                   episodes={episodes.map((ep) => ({
                     ...ep,
-                    id: `${id}?ep=${ep.episode_no}`,
+                    id: `${id}?ep=${ep.data_id}`,
                   }))}
                   playNext={playNextEpisode}
                   animeInfo={anime}
@@ -263,12 +292,19 @@ const WatchPage = () => {
                   streamInfo={streamingData}
                 />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                  <p className="text-center">
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground p-4">
+                  <p className="text-center mb-4">
                     {loadingEpisodes
                       ? "Loading..."
+                      : servers.length === 0
+                      ? "Loading servers..."
                       : "No stream available. Try another server."}
                   </p>
+                  {servers.length > 0 && (
+                    <p className="text-sm text-center">
+                      Current: {currentServer} ({currentType})
+                    </p>
+                  )}
                 </div>
               )}
             </div>
@@ -313,7 +349,7 @@ const WatchPage = () => {
                       const isActive = ep.episode_no === currentEpisodeNo;
                       return (
                         <button
-                          key={ep.id}
+                          key={ep.id || ep.episode_no}
                           onClick={() => handleEpisodeChange(ep.episode_no)}
                           className={`aspect-square flex items-center justify-center rounded-md text-sm font-medium transition-all ${
                             isActive
