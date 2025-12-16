@@ -1,8 +1,7 @@
 import axios from 'axios';
-import type { HomeData, AnimeDetails, Episode, StreamingInfo } from '@/types/anime';
+import type { HomeData, Episode, StreamingInfo, Server } from '@/types/anime';
 
 const API_BASE_URL = 'https://hinime-two.vercel.app/api';
-const PROXY_URL = 'https://proxyfy-two.vercel.app/m3u8-proxy?url=';
 
 // Create axios instance
 const api = axios.create({
@@ -43,14 +42,28 @@ export const getEpisodes = async (id: string): Promise<{ totalEpisodes: number; 
   }
 };
 
+// Get available servers for an episode
+// The episodeId should be in format: "anime-id?ep=episode-data-id"
+export const getServers = async (episodeId: string): Promise<Server[]> => {
+  try {
+    const response = await api.get(`/servers/${episodeId}`);
+    return response.data.results || [];
+  } catch (error) {
+    console.error('Error fetching servers:', error);
+    return [];
+  }
+};
+
 // Get streaming info for an episode
+// The episodeId should be in format: "anime-id?ep=episode-data-id"
 export const getStreamingInfo = async (
   episodeId: string,
   server: string = 'hd-1',
   type: string = 'sub'
 ): Promise<StreamingInfo> => {
   try {
-    const response = await api.get(`/stream?id=${episodeId}&server=${server}&type=${type}`);
+    // The API expects the full episode ID with the anime ID and episode number
+    const response = await api.get(`/stream?id=${encodeURIComponent(episodeId)}&server=${server}&type=${type}`);
     return response.data.results;
   } catch (error) {
     console.error('Error fetching streaming info:', error);
@@ -60,7 +73,7 @@ export const getStreamingInfo = async (
 
 // Get proxied video URL
 export const getProxiedUrl = (url: string): string => {
-  return `${PROXY_URL}${encodeURIComponent(url)}`;
+  return `https://proxyfy-two.vercel.app/m3u8-proxy?url=${encodeURIComponent(url)}`;
 };
 
 // Search anime
