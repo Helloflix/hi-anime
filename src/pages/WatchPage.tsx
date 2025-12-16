@@ -1,197 +1,369 @@
-import { useEffect, useMemo, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, SkipBack, SkipForward } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { useParams, useSearchParams, Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import VideoPlayer from "@/components/VideoPlayer";
+import Player from "@/components/player/Player";
+import EpisodeList from "@/components/watch/EpisodeList";
+import ServerSelector from "@/components/watch/ServerSelector";
+import WatchControls from "@/components/watch/WatchControls";
+import RelatedAnime from "@/components/watch/RelatedAnime";
+import AnimeInfoSection from "@/components/watch/AnimeInfoSection";
 import { getEpisodes, getStreamingInfo, getAnimeDetails } from "@/services/animeApi";
-import type { Episode, Server, StreamLink, AnimeDetails as AnimeDetailsType } from "@/types/anime";
+import type { Episode, Server, StreamLink, AnimeBasic } from "@/types/anime";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const slugifyServer = (name?: string) =>
   (name || "").toString().trim().toLowerCase().replace(/\s+/g, "-");
 
 const WatchPage = () => {
   const { id } = useParams<{ id: string }>();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const epParam = searchParams.get("ep");
 
-  const [anime, setAnime] = useState<AnimeDetailsType | null>(null);
+  // Anime data states
+  const [anime, setAnime] = useState<any>(null);
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [totalEpisodes, setTotalEpisodes] = useState<number>(0);
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [relatedAnime, setRelatedAnime] = useState<AnimeBasic[]>([]);
+  const [seasons, setSeasons] = useState<any[]>([]);
 
-  const [currentType, setCurrentType] = useState<'sub' | 'dub'>("sub");
+  // Current episode state
+  const [currentEpisodeNo, setCurrentEpisodeNo] = useState<number>(1);
+  const currentEpisode = episodes.find((ep) => ep.episode_no === currentEpisodeNo);
+
+  // Server/streaming states
+  const [currentType, setCurrentType] = useState<"sub" | "dub">("sub");
   const [servers, setServers] = useState<Server[]>([]);
   const [currentServer, setCurrentServer] = useState<string>("hd-1");
+  const [streamingData, setStreamingData] = useState<any>(null);
 
-  const [streamingLinks, setStreamingLinks] = useState<StreamLink[]>([]);
-  const [loadingEpisodes, setLoadingEpisodes] = useState<boolean>(true);
-  const [loadingStream, setLoadingStream] = useState<boolean>(false);
+  // Loading states
+  const [loadingAnime, setLoadingAnime] = useState(true);
+  const [loadingEpisodes, setLoadingEpisodes] = useState(true);
+  const [loadingStream, setLoadingStream] = useState(false);
 
-  // Fetch anime details (for title and poster)
+  // Control states
+  const [autoPlay, setAutoPlay] = useState(true);
+  const [autoNext, setAutoNext] = useState(true);
+  const [autoSkip, setAutoSkip] = useState(true);
+  const [lightMode, setLightMode] = useState(false);
+
+  // Fetch anime details
   useEffect(() => {
-    const run = async () => {
+    const fetchAnimeDetails = async () => {
       if (!id) return;
+      setLoadingAnime(true);
       try {
-        const details = await getAnimeDetails(id);
-        setAnime(details.data);
-      } catch (_) {}
+        const result = await getAnimeDetails(id);
+        setAnime(result.data);
+        setRelatedAnime(result.related_data || []);
+        setSeasons(result.seasons || []);
+      } catch (error) {
+        console.error("Failed to fetch anime details:", error);
+      } finally {
+        setLoadingAnime(false);
+      }
     };
-    run();
+    fetchAnimeDetails();
   }, [id]);
 
-  // Fetch episodes for this anime
+  // Fetch episodes
   useEffect(() => {
-    const run = async () => {
+    const fetchEpisodes = async () => {
       if (!id) return;
+      setLoadingEpisodes(true);
       try {
-        setLoadingEpisodes(true);
         const data = await getEpisodes(id);
         setEpisodes(data.episodes || []);
-        setTotalEpisodes(data.totalEpisodes || (data.episodes?.length ?? 0));
-        setCurrentIndex(0);
-      } catch (e) {
-        console.error("Failed to load episodes", e);
+        setTotalEpisodes(data.totalEpisodes || data.episodes?.length || 0);
+
+        // Set initial episode from URL or default to 1
+        const initialEp = epParam ? parseInt(epParam) : 1;
+        const validEp =
+          data.episodes?.find((ep) => ep.episode_no === initialEp)?.episode_no ||
+          data.episodes?.[0]?.episode_no ||
+          1;
+        setCurrentEpisodeNo(validEp);
+      } catch (error) {
+        console.error("Failed to fetch episodes:", error);
       } finally {
         setLoadingEpisodes(false);
       }
     };
-    run();
+    fetchEpisodes();
   }, [id]);
 
-  const currentEpisode = episodes[currentIndex];
-
-  const selectedStream: StreamLink | undefined = useMemo(() => {
-    const linksArr = Array.isArray(streamingLinks) ? streamingLinks : [];
-    if (linksArr.length === 0) return undefined;
-    const m3u8 = linksArr.find((s) =>
-      (s.link?.type || "").toLowerCase().includes("m3u8") || (s.link?.type || "").toLowerCase().includes("mpegurl")
-    );
-    return m3u8 || linksArr[0];
-  }, [streamingLinks]);
-
-  // Load streaming when episode/server/type changes
+  // Update URL when episode changes
   useEffect(() => {
-    const loadStream = async () => {
+    if (currentEpisodeNo) {
+      setSearchParams({ ep: String(currentEpisodeNo) }, { replace: true });
+    }
+  }, [currentEpisodeNo, setSearchParams]);
+
+  // Fetch streaming info when episode/server/type changes
+  useEffect(() => {
+    const fetchStream = async () => {
       if (!currentEpisode?.id) return;
+      setLoadingStream(true);
       try {
-        setLoadingStream(true);
-        const info = await getStreamingInfo(currentEpisode.id, currentServer, currentType);
-        // Set/merge servers once (or update if type changed)
+        const info = await getStreamingInfo(
+          currentEpisode.id,
+          currentServer,
+          currentType
+        );
+
         if (info.servers && info.servers.length > 0) {
           setServers(info.servers);
-          // Ensure currentServer is valid for the current type
           const availableForType = info.servers.filter((s) => s.type === currentType);
-          const names = availableForType.map((s) => slugifyServer(s.server_name || s.serverName));
+          const names = availableForType.map((s) =>
+            slugifyServer(s.server_name || s.serverName)
+          );
           if (names.length > 0 && !names.includes(currentServer)) {
             setCurrentServer(names[0]);
           }
         }
-        const links = info.streamingLink || [];
-        setStreamingLinks(Array.isArray(links) ? links : []);
-      } catch (e) {
-        console.error("Failed to load streaming info", e);
-        setStreamingLinks([]);
+
+        setStreamingData(info);
+      } catch (error) {
+        console.error("Failed to fetch streaming info:", error);
+        setStreamingData(null);
       } finally {
         setLoadingStream(false);
       }
     };
-    loadStream();
+    fetchStream();
   }, [currentEpisode?.id, currentServer, currentType]);
 
-  const handleServerChange = (slug: string) => {
-    setCurrentServer(slug);
+  // Episode navigation handlers
+  const handleEpisodeChange = useCallback((episodeNo: number) => {
+    setCurrentEpisodeNo(episodeNo);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
+  const goPrev = () => {
+    const currentIdx = episodes.findIndex((ep) => ep.episode_no === currentEpisodeNo);
+    if (currentIdx > 0) {
+      handleEpisodeChange(episodes[currentIdx - 1].episode_no);
+    }
   };
 
-  const handleTypeChange = (type: 'sub' | 'dub') => {
+  const goNext = () => {
+    const currentIdx = episodes.findIndex((ep) => ep.episode_no === currentEpisodeNo);
+    if (currentIdx < episodes.length - 1) {
+      handleEpisodeChange(episodes[currentIdx + 1].episode_no);
+    }
+  };
+
+  const playNextEpisode = useCallback(
+    (nextEpId: string) => {
+      const match = nextEpId.match(/ep=(\d+)/);
+      if (match) {
+        handleEpisodeChange(parseInt(match[1]));
+      }
+    },
+    [handleEpisodeChange]
+  );
+
+  // Server handlers
+  const handleServerChange = (serverId: string, type: "sub" | "dub") => {
+    setCurrentServer(serverId);
     setCurrentType(type);
-    // Try to switch to the first available server for this type if present
+  };
+
+  const handleTypeChange = (type: "sub" | "dub") => {
+    setCurrentType(type);
     const available = servers.filter((s) => s.type === type);
     if (available.length > 0) {
       setCurrentServer(slugifyServer(available[0].server_name || available[0].serverName));
     }
   };
 
-  const goPrev = () => setCurrentIndex((i) => Math.max(0, i - 1));
-  const goNext = () => setCurrentIndex((i) => Math.min(episodes.length - 1, i + 1));
+  // Extract stream data for player
+  const streamUrl = streamingData?.streamingLink?.[0]?.link?.file;
+  const subtitles = streamingData?.streamingLink?.[0]?.tracks || [];
+  const intro = streamingData?.streamingLink?.[0]?.intro;
+  const outro = streamingData?.streamingLink?.[0]?.outro;
+  const thumbnail = streamingData?.streamingLink?.[0]?.thumbnail;
+
+  const currentIdx = episodes.findIndex((ep) => ep.episode_no === currentEpisodeNo);
+  const hasPrev = currentIdx > 0;
+  const hasNext = currentIdx < episodes.length - 1;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Top Bar */}
-      <div className="container px-4 py-4">
-        <div className="flex items-center justify-between">
-          <Button variant="ghost" asChild>
-            <Link to={`/anime/${id}`}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Details
-            </Link>
-          </Button>
-
-          {anime?.title && (
-            <h1 className="text-sm md:text-base text-muted-foreground line-clamp-1">{anime.title}</h1>
-          )}
-        </div>
-      </div>
-
-      {/* Video Player */}
-      <div className="container px-4">
-        <div className="space-y-3">
-          <VideoPlayer
-            streamingData={selectedStream}
-            servers={servers}
-            currentServer={currentServer}
-            onServerChange={handleServerChange}
-            currentType={currentType}
-            onTypeChange={handleTypeChange}
-          />
-
-          {/* Quick Controls */}
-          <div className="flex items-center gap-2 justify-between">
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" disabled={currentIndex === 0} onClick={goPrev}>
-                <SkipBack className="h-4 w-4 mr-1" /> Prev
-              </Button>
-              <Button variant="outline" size="sm" disabled={currentIndex >= episodes.length - 1} onClick={goNext}>
-                Next <SkipForward className="h-4 w-4 ml-1" />
-              </Button>
-            </div>
-
-            {currentEpisode && (
-              <Badge variant="secondary" className="text-xs">
-                Episode {currentEpisode.episode_no}
-              </Badge>
+    <div className={`min-h-screen ${lightMode ? "bg-white" : "bg-background"}`}>
+      {/* Header */}
+      <div className="bg-[#191826] border-b border-border/30">
+        <div className="container px-4 py-3">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="sm" asChild>
+              <Link to={`/anime/${id}`}>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Link>
+            </Button>
+            {anime?.title && (
+              <h1 className="text-sm text-muted-foreground truncate">
+                {anime.title} - Episode {currentEpisodeNo}
+              </h1>
             )}
           </div>
         </div>
       </div>
 
-      {/* Episode List */}
-      <div className="container px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            {/* Placeholder for description or comments if needed */}
-          </div>
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Episodes {totalEpisodes ? `(${totalEpisodes})` : ""}</h3>
-            <div className="anime-card p-4 max-h-96 overflow-y-auto">
-              <div className="grid grid-cols-6 gap-2">
-                {episodes.map((ep, idx) => {
-                  const isActive = idx === currentIndex;
-                  return (
-                    <button
-                      key={ep.id}
-                      onClick={() => setCurrentIndex(idx)}
-                      className={`aspect-square flex items-center justify-center rounded-md text-sm font-medium transition-all ${
-                        isActive
-                          ? "bg-primary text-primary-foreground shadow-lg scale-105"
-                          : "bg-secondary hover:bg-secondary/80 hover:scale-105"
-                      }`}
-                    >
-                      {ep.episode_no}
-                    </button>
-                  );
-                })}
-              </div>
+      {/* Main Content */}
+      <div className="container px-4 py-4">
+        <div className="grid grid-cols-1 xl:grid-cols-[280px_1fr_280px] gap-4">
+          {/* Left Sidebar - Episode List */}
+          <div className="hidden xl:block">
+            <div className="sticky top-4 h-[calc(100vh-120px)] rounded-lg overflow-hidden">
+              {loadingEpisodes ? (
+                <div className="bg-[#191826] h-full flex items-center justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : (
+                <EpisodeList
+                  episodes={episodes}
+                  currentEpisode={String(currentEpisodeNo)}
+                  onEpisodeClick={handleEpisodeChange}
+                  totalEpisodes={totalEpisodes}
+                  hasSubbed={servers.some((s) => s.type === "sub")}
+                  hasDubbed={servers.some((s) => s.type === "dub")}
+                />
+              )}
             </div>
           </div>
+
+          {/* Center - Player Area */}
+          <div className="space-y-4">
+            {/* Video Player */}
+            <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
+              {loadingStream ? (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                </div>
+              ) : streamUrl ? (
+                <Player
+                  streamUrl={streamUrl}
+                  subtitles={subtitles}
+                  thumbnail={thumbnail}
+                  intro={intro}
+                  outro={outro}
+                  autoSkipIntro={autoSkip}
+                  autoPlay={autoPlay}
+                  autoNext={autoNext}
+                  episodeId={String(currentEpisodeNo)}
+                  episodes={episodes.map((ep) => ({
+                    ...ep,
+                    id: `${id}?ep=${ep.episode_no}`,
+                  }))}
+                  playNext={playNextEpisode}
+                  animeInfo={anime}
+                  episodeNum={currentEpisodeNo}
+                  streamInfo={streamingData}
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+                  <p className="text-center">
+                    {loadingEpisodes
+                      ? "Loading..."
+                      : "No stream available. Try another server."}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Watch Controls */}
+            <WatchControls
+              autoPlay={autoPlay}
+              setAutoPlay={setAutoPlay}
+              autoNext={autoNext}
+              setAutoNext={setAutoNext}
+              autoSkip={autoSkip}
+              setAutoSkip={setAutoSkip}
+              lightMode={lightMode}
+              setLightMode={setLightMode}
+              onPrev={goPrev}
+              onNext={goNext}
+              hasPrev={hasPrev}
+              hasNext={hasNext}
+            />
+
+            {/* Server Selector */}
+            <ServerSelector
+              servers={servers}
+              activeServerId={currentServer}
+              onServerChange={handleServerChange}
+              currentType={currentType}
+              onTypeChange={handleTypeChange}
+              loading={loadingStream}
+            />
+
+            {/* Mobile Episode List */}
+            <div className="xl:hidden">
+              <div className="bg-[#191826] rounded-lg overflow-hidden">
+                <div className="px-4 py-3 border-b border-border/30">
+                  <h3 className="font-semibold">
+                    Episodes {totalEpisodes ? `(${totalEpisodes})` : ""}
+                  </h3>
+                </div>
+                <div className="p-4 max-h-64 overflow-y-auto">
+                  <div className="grid grid-cols-8 sm:grid-cols-10 gap-2">
+                    {episodes.map((ep) => {
+                      const isActive = ep.episode_no === currentEpisodeNo;
+                      return (
+                        <button
+                          key={ep.id}
+                          onClick={() => handleEpisodeChange(ep.episode_no)}
+                          className={`aspect-square flex items-center justify-center rounded-md text-sm font-medium transition-all ${
+                            isActive
+                              ? "bg-primary text-primary-foreground shadow-lg"
+                              : "bg-secondary/50 hover:bg-secondary text-foreground"
+                          }`}
+                        >
+                          {ep.episode_no}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Anime Info Section */}
+            <AnimeInfoSection
+              anime={anime}
+              seasons={seasons}
+              currentAnimeId={id}
+            />
+          </div>
+
+          {/* Right Sidebar - Related Anime */}
+          <div className="hidden xl:block">
+            <div className="sticky top-4">
+              {loadingAnime ? (
+                <div className="bg-[#191826] rounded-lg p-4 space-y-4">
+                  <Skeleton className="h-6 w-24" />
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="flex gap-3">
+                      <Skeleton className="w-16 h-20 rounded" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-4 w-full" />
+                        <Skeleton className="h-3 w-20" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <RelatedAnime relatedAnime={relatedAnime} />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Related Anime */}
+        <div className="xl:hidden mt-6">
+          <RelatedAnime relatedAnime={relatedAnime} />
         </div>
       </div>
     </div>
