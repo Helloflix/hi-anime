@@ -209,11 +209,11 @@ const WatchPage = () => {
   };
 
   // Extract stream data for player
-  const streamUrl = streamingData?.streamingLink?.[0]?.link?.file;
-  const subtitles = streamingData?.streamingLink?.[0]?.tracks || [];
-  const intro = streamingData?.streamingLink?.[0]?.intro;
-  const outro = streamingData?.streamingLink?.[0]?.outro;
-  const thumbnail = streamingData?.streamingLink?.[0]?.thumbnail;
+  const streamUrl = streamingData?.streamingLink?.link?.file;
+  const subtitles = streamingData?.streamingLink?.tracks || [];
+  const intro = streamingData?.streamingLink?.intro;
+  const outro = streamingData?.streamingLink?.outro;
+  const thumbnail = streamingData?.streamingLink?.thumbnail;
 
   const currentIdx = episodes.findIndex((ep) => ep.episode_no === currentEpisodeNo);
   const hasPrev = currentIdx > 0;
