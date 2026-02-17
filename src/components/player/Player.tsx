@@ -482,13 +482,10 @@ export default function Player({
         (art.layers as any).website_logo.style.opacity = 0;
       }, 2000);
 
-      const subs = (subtitles || []).map((s: any) => ({ ...s }));
-
-      for (const sub of subs) {
-        const encodedUrl = encodeURIComponent(sub.file);
-        const encodedHeaders = encodeURIComponent(JSON.stringify(headers));
-        sub.file = `${proxy}${encodedUrl}&headers=${encodedHeaders}`;
-      }
+      const subs = (subtitles || []).map((s: any) => ({
+        ...s,
+        file: `${m3u8proxy[0]}${encodeURIComponent(s.file)}&headers=${encodeURIComponent(JSON.stringify(headers))}`,
+      }));
 
       const defaultSubtitle = subs?.find((sub: any) => sub.label.toLowerCase() === "english");
       if (defaultSubtitle) {
