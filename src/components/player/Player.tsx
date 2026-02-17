@@ -484,7 +484,7 @@ export default function Player({
 
       const subs = (subtitles || []).map((s: any) => ({
         ...s,
-        file: `${m3u8proxy[0]}${encodeURIComponent(s.file)}&headers=${encodeURIComponent(JSON.stringify(headers))}`,
+        file: `${proxy}${encodeURIComponent(s.file)}`,
       }));
 
       const defaultSubtitle = subs?.find((sub: any) => sub.label.toLowerCase() === "english");
@@ -495,8 +495,8 @@ export default function Player({
       }
 
       const skipRanges = [
-        ...(intro?.start != null && intro?.end != null ? [[intro.start + 1, intro.end - 1]] : []),
-        ...(outro?.start != null && outro?.end != null ? [[outro.start + 1, outro.end]] : []),
+        ...(intro?.start != null && intro?.end != null && intro.start + 1 < intro.end - 1 ? [[intro.start + 1, intro.end - 1]] : []),
+        ...(outro?.start != null && outro?.end != null && outro.start + 1 < outro.end ? [[outro.start + 1, outro.end]] : []),
       ];
       autoSkipIntro && art.plugins.add(autoSkip(skipRanges));
 

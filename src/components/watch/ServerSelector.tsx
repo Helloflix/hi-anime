@@ -1,7 +1,7 @@
-import { useState } from "react";
 import { Captions, Mic, Download, Monitor } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Server } from "@/types/anime";
+import { M3U8_PROXY_URL } from "@/config/api";
 
 interface ServerSelectorProps {
   servers: Server[];
@@ -10,6 +10,7 @@ interface ServerSelectorProps {
   currentType: "sub" | "dub";
   onTypeChange: (type: "sub" | "dub") => void;
   loading?: boolean;
+  streamUrl?: string;
 }
 
 const ServerSelector = ({
@@ -19,6 +20,7 @@ const ServerSelector = ({
   currentType,
   onTypeChange,
   loading = false,
+  streamUrl,
 }: ServerSelectorProps) => {
   const subServers = servers.filter((s) => s.type === "sub");
   const dubServers = servers.filter((s) => s.type === "dub");
@@ -107,6 +109,25 @@ const ServerSelector = ({
           "dub"
         )}
       </div>
+
+      {/* Download Button */}
+      {streamUrl && (
+        <div className="flex items-center gap-3 pt-2 border-t border-border/20">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 text-xs bg-green-500/20 text-green-400 border-green-500/30 hover:bg-green-500/30 hover:text-green-300"
+            onClick={() => {
+              const m3u8proxy = M3U8_PROXY_URL.split(",");
+              const proxyUrl = m3u8proxy[0] + encodeURIComponent(streamUrl);
+              window.open(proxyUrl, "_blank");
+            }}
+          >
+            <Download className="h-3.5 w-3.5 mr-1.5" />
+            Download Video
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
