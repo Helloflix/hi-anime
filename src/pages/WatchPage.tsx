@@ -333,6 +333,7 @@ const WatchPage = () => {
               currentType={currentType}
               onTypeChange={handleTypeChange}
               loading={loadingStream}
+              streamUrl={streamUrl}
             />
 
             {/* Mobile Episode List */}
