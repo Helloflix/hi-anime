@@ -482,16 +482,39 @@ export default function Player({
         (art.layers as any).website_logo.style.opacity = 0;
       }, 2000);
 
-      const subs = (subtitles || []).map((s: any) => ({
+      // Filter to only caption/subtitle tracks (exclude thumbnails etc.)
+      const captionTracks = (subtitles || []).filter(
+        (s: any) => s.kind === "captions" || s.kind === "subtitles"
+      );
+      // Try direct URLs first (most VTT CDNs allow CORS), with proxy as fallback
+      const subs = captionTracks.map((s: any) => ({
         ...s,
-        file: `${proxy}${encodeURIComponent(s.file)}`,
+        file: s.file, // Use direct URL first
+        proxyFile: `${proxy}${encodeURIComponent(s.file)}`, // Fallback
       }));
 
       const defaultSubtitle = subs?.find((sub: any) => sub.label.toLowerCase() === "english");
       if (defaultSubtitle) {
-        art.subtitle.switch(defaultSubtitle.file, {
-          name: defaultSubtitle.label,
-        });
+        // Try direct URL first, fallback to proxy if it fails
+        const tryLoadSubtitle = async (sub: any) => {
+          try {
+            const res = await fetch(sub.file, { method: "HEAD", mode: "cors" });
+            if (res.ok) {
+              art.subtitle.switch(sub.file, { name: sub.label });
+              console.log("Subtitle loaded directly:", sub.label);
+              return;
+            }
+          } catch (e) {
+            // Direct failed, try proxy
+          }
+          try {
+            art.subtitle.switch(sub.proxyFile, { name: sub.label });
+            console.log("Subtitle loaded via proxy:", sub.label);
+          } catch (e) {
+            console.error("Failed to load subtitle:", sub.label, e);
+          }
+        };
+        tryLoadSubtitle(defaultSubtitle);
       }
 
       const skipRanges = [
@@ -584,10 +607,21 @@ export default function Player({
               default: sub.label.toLowerCase() === "english" && sub === defaultEnglishSub,
               html: sub.label,
               url: sub.file,
+              proxyUrl: sub.proxyFile,
             })),
           ],
-          onSelect: (item: any) => {
-            art.subtitle.switch(item.url, { name: item.html });
+          onSelect: async (item: any) => {
+            // Try direct URL first, fallback to proxy
+            try {
+              const res = await fetch(item.url, { method: "HEAD", mode: "cors" });
+              if (res.ok) {
+                art.subtitle.switch(item.url, { name: item.html });
+                return item.html;
+              }
+            } catch (e) {
+              // Direct failed
+            }
+            art.subtitle.switch(item.proxyUrl, { name: item.html });
             return item.html;
           },
         });
