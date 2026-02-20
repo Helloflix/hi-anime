@@ -210,10 +210,13 @@ const WatchPage = () => {
 
   // Extract stream data for player
   const streamUrl = streamingData?.streamingLink?.link?.file;
-  const subtitles = streamingData?.streamingLink?.tracks || [];
+  const allTracks = streamingData?.streamingLink?.tracks || [];
+  // Separate caption tracks from thumbnail tracks
+  const subtitles = allTracks.filter((t: any) => t.kind === "captions" || t.kind === "subtitles");
+  const thumbnailTrack = allTracks.find((t: any) => t.kind === "thumbnails");
   const intro = streamingData?.streamingLink?.intro;
   const outro = streamingData?.streamingLink?.outro;
-  const thumbnail = streamingData?.streamingLink?.thumbnail;
+  const thumbnail = thumbnailTrack?.file || streamingData?.streamingLink?.thumbnail;
 
   const currentIdx = episodes.findIndex((ep) => ep.episode_no === currentEpisodeNo);
   const hasPrev = currentIdx > 0;
