@@ -57,3 +57,29 @@
     height: 20px;
   }
 }
+
+/* Fullscreen icon sizes for desktop/tablet */
+@media screen and (min-width: 768px) {
+  :fullscreen .art-controls .art-control svg,
+  :-webkit-full-screen .art-controls .art-control svg {
+    width: 28px;
+    height: 28px;
+  }
+  :fullscreen .art-setting .art-icon svg,
+  :-webkit-full-screen .art-setting .art-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+  :fullscreen .art-bottom .art-control svg,
+  :-webkit-full-screen .art-bottom .art-control svg {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+/* Mobile player: prevent overflow */
+@media screen and (max-width: 767px) {
+  .art-video-player {
+    max-width: 100vw !important;
+  }
+}

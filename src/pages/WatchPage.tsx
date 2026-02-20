@@ -223,19 +223,19 @@ const WatchPage = () => {
   const hasNext = currentIdx < episodes.length - 1;
 
   return (
-    <div className={`min-h-screen ${lightMode ? "bg-white" : "bg-background"}`}>
+    <div className={`min-h-screen overflow-x-hidden ${lightMode ? "bg-white" : "bg-background"}`}>
       {/* Header */}
       <div className="bg-[#191826] border-b border-border/30">
-        <div className="container px-4 py-3">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="sm" asChild>
+        <div className="max-w-full px-2 sm:px-4 py-3">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+            <Button variant="ghost" size="sm" asChild className="shrink-0">
               <Link to={`/anime/${id}`}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
+                <ArrowLeft className="h-4 w-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Back</span>
               </Link>
             </Button>
             {anime?.title && (
-              <h1 className="text-sm text-muted-foreground truncate">
+              <h1 className="text-xs sm:text-sm text-muted-foreground truncate min-w-0">
                 {anime.title} - Episode {currentEpisodeNo}
               </h1>
             )}
@@ -244,8 +244,8 @@ const WatchPage = () => {
       </div>
 
       {/* Main Content */}
-      <div className="container px-4 py-4">
-        <div className="grid grid-cols-1 xl:grid-cols-[280px_1fr_280px] gap-4">
+      <div className="max-w-full px-2 sm:px-4 py-2 sm:py-4">
+        <div className="grid grid-cols-1 xl:grid-cols-[280px_1fr_280px] gap-2 sm:gap-4">
           {/* Left Sidebar - Episode List */}
           <div className="hidden xl:block">
             <div className="sticky top-4 h-[calc(100vh-120px)] rounded-lg overflow-hidden">
@@ -267,9 +267,9 @@ const WatchPage = () => {
           </div>
 
           {/* Center - Player Area */}
-          <div className="space-y-4">
+          <div className="space-y-2 sm:space-y-4 min-w-0 overflow-hidden">
             {/* Video Player */}
-            <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
+            <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden max-w-full">
               {loadingStream ? (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -342,13 +342,13 @@ const WatchPage = () => {
             {/* Mobile Episode List */}
             <div className="xl:hidden">
               <div className="bg-[#191826] rounded-lg overflow-hidden">
-                <div className="px-4 py-3 border-b border-border/30">
-                  <h3 className="font-semibold">
+                <div className="px-3 sm:px-4 py-3 border-b border-border/30">
+                  <h3 className="font-semibold text-sm sm:text-base">
                     Episodes {totalEpisodes ? `(${totalEpisodes})` : ""}
                   </h3>
                 </div>
-                <div className="p-4 max-h-64 overflow-y-auto">
-                  <div className="grid grid-cols-8 sm:grid-cols-10 gap-2">
+                <div className="p-2 sm:p-4 max-h-64 overflow-y-auto">
+                  <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-1.5 sm:gap-2">
                     {episodes.map((ep) => {
                       const isActive = ep.episode_no === currentEpisodeNo;
                       return (

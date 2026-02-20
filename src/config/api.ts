@@ -3,14 +3,18 @@
 
 export const API_URL = 'https://hinime-two.vercel.app/api';
 
-// Proxy server for CORS handling
+// Proxy server for CORS handling (subtitles, etc.)
 export const PROXY_URL = 'https://zenime-1-qejh.onrender.com/?url=';
 
-// M3U8 proxy for video streaming
+// M3U8 proxy servers for video streaming - multiple for fallback
 export const M3U8_PROXY_URL = 'https://proxyfy-two.vercel.app/m3u8-proxy?url=';
 
-// Worker URLs for additional functionality (optional)
-export const WORKER_URLS = [
-  // Add worker URLs here if needed
-  // 'https://worker1.workers.dev',
+// List of M3U8 proxy servers ordered by priority
+export const M3U8_PROXIES = [
+  'https://proxyfy-two.vercel.app/m3u8-proxy?url=',
+  'https://m3u8-proxy-cors-anywhere.onrender.com/cors?url=',
+  'https://cors-anywhere-oxpk.onrender.com/?url=',
 ];
+
+// Timeout in ms before trying the next proxy
+export const PROXY_TIMEOUT_MS = 8000;
