@@ -500,7 +500,7 @@ export default function Player({
       ];
       fullscreenEvents.forEach((ev) => document.addEventListener(ev, onFullscreenChange));
 
-      art.on("ready", () => {
+      art.on("ready", async () => {
         try {
           container.focus();
         } catch (e) {
@@ -525,13 +525,43 @@ export default function Player({
           (s: any) => s.kind === "captions" || s.kind === "subtitles"
         );
 
-        // Always use proxy for subtitles to avoid CORS issues
+        // Build subtitle list with multiple URL strategies
         const subs = captionTracks.map((s: any) => ({
           ...s,
-          url: `${proxy}${encodeURIComponent(s.file)}`,
+          // Primary: direct URL (works when CORS is allowed)
+          directUrl: s.file,
+          // Fallback 1: main CORS proxy 
+          proxyUrl1: `${proxy}${encodeURIComponent(s.file)}`,
+          // Fallback 2: alternative CORS proxy
+          proxyUrl2: `https://corsproxy.io/?${encodeURIComponent(s.file)}`,
+          // Start with proxy (more reliable for cross-origin VTT)
+          url: `https://corsproxy.io/?${encodeURIComponent(s.file)}`,
         }));
 
-        // Load default English subtitle
+        // Function to try loading a subtitle with fallback
+        const tryLoadSubtitle = async (sub: any) => {
+          // Try corsproxy.io first (most reliable)
+          const urls = [sub.proxyUrl2, sub.proxyUrl1, sub.directUrl];
+          for (const url of urls) {
+            try {
+              const controller = new AbortController();
+              const timer = setTimeout(() => controller.abort(), 5000);
+              const res = await fetch(url, { signal: controller.signal });
+              clearTimeout(timer);
+              if (res.ok) {
+                const text = await res.text();
+                if (text && text.includes("WEBVTT")) {
+                  return url;
+                }
+              }
+            } catch {
+              // Try next URL
+            }
+          }
+          return sub.proxyUrl2; // Default fallback
+        };
+
+        // Load default English subtitle with fallback strategy
         const defaultSubtitle =
           subs.find((sub: any) => sub.label?.toLowerCase() === "english" && sub.default) ||
           subs.find((sub: any) => sub.label?.toLowerCase() === "english") ||
@@ -539,7 +569,18 @@ export default function Player({
 
         if (defaultSubtitle) {
           try {
-            art.subtitle.switch(defaultSubtitle.url, { name: defaultSubtitle.label });
+            const workingUrl = await tryLoadSubtitle(defaultSubtitle);
+            defaultSubtitle.url = workingUrl;
+            art.subtitle.switch(workingUrl, { name: defaultSubtitle.label });
+            // Update all subs to use the same proxy that worked
+            const workingProxy = workingUrl.startsWith("https://corsproxy.io") 
+              ? "corsproxy" 
+              : workingUrl.startsWith(proxy) ? "proxy" : "direct";
+            subs.forEach((s: any) => {
+              if (workingProxy === "corsproxy") s.url = s.proxyUrl2;
+              else if (workingProxy === "proxy") s.url = s.proxyUrl1;
+              else s.url = s.directUrl;
+            });
           } catch (e) {
             console.error("Failed to load default subtitle:", e);
           }
