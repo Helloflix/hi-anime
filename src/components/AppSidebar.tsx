@@ -102,7 +102,7 @@ export function AppSidebar() {
                     {({ isActive }) => (
                       <>
                         <item.icon className={cn(
-                          "h-5 w-5 transition-transform duration-200",
+                          "h-5 w-5 md:h-6 md:w-6 lg:h-6 lg:w-6 transition-transform duration-200",
                           isActive && "scale-110"
                         )} />
                         {showText && <span>{item.title}</span>}
@@ -152,7 +152,7 @@ export function AppSidebar() {
                     {({ isActive }) => (
                       <>
                         <item.icon className={cn(
-                          "h-4 w-4 transition-all duration-200",
+                          "h-4 w-4 md:h-5 md:w-5 lg:h-5 lg:w-5 transition-all duration-200",
                           isActive && "text-primary"
                         )} />
                         {showText && <span>{item.title}</span>}
@@ -202,7 +202,7 @@ export function AppSidebar() {
                     {({ isActive }) => (
                       <>
                         <item.icon className={cn(
-                          "h-4 w-4 transition-all duration-200",
+                          "h-4 w-4 md:h-5 md:w-5 lg:h-5 lg:w-5 transition-all duration-200",
                           isActive && "text-primary"
                         )} />
                         {showText && <span>{item.title}</span>}

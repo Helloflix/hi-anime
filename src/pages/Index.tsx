@@ -36,7 +36,6 @@ const Index = () => {
         animeList={homeData?.trending || []}
         viewAllLink="/trending"
         loading={loading}
-        showRank
         limit={18}
       />
 
