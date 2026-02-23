@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Search, User, LogOut, Settings, Menu } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Input } from "./ui/input";
@@ -9,12 +9,28 @@ import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { toast } from "sonner";
 import { ThemeToggle } from "./ThemeToggle";
+import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
+import SearchSuggestions from "./SearchSuggestions";
 
 const Header = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [showProfile, setShowProfile] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { suggestions, isLoading } = useSearchSuggestions(searchQuery);
+
+  // Close suggestions on outside click
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -56,16 +72,31 @@ const Header = () => {
         </Link>
 
         {/* Search Bar */}
-        <form onSubmit={handleSearch} className="flex-1 min-w-0">
-          <div className="relative">
+        <form onSubmit={(e) => { handleSearch(e); setShowSuggestions(false); }} className="flex-1 min-w-0">
+          <div className="relative" ref={searchRef}>
             <Search className="absolute left-2 md:left-2.5 lg:left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 md:h-4 md:w-4 lg:h-5 lg:w-5 text-muted-foreground" />
             <Input
               type="search"
               placeholder="Search anime..."
               className="pl-7 md:pl-8 lg:pl-10 bg-muted/50 h-8 md:h-8 lg:h-10 text-xs md:text-sm w-full"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setShowSuggestions(true);
+              }}
+              onFocus={() => setShowSuggestions(true)}
             />
+            {showSuggestions && (
+              <SearchSuggestions
+                suggestions={suggestions}
+                isLoading={isLoading}
+                query={searchQuery}
+                onSelect={() => {
+                  setShowSuggestions(false);
+                  setSearchQuery("");
+                }}
+              />
+            )}
           </div>
         </form>
 
