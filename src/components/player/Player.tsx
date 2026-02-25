@@ -528,20 +528,16 @@ export default function Player({
         // Build subtitle list with multiple URL strategies
         const subs = captionTracks.map((s: any) => ({
           ...s,
-          // Primary: direct URL (works when CORS is allowed)
           directUrl: s.file,
-          // Fallback 1: main CORS proxy 
           proxyUrl1: `${proxy}${encodeURIComponent(s.file)}`,
-          // Fallback 2: alternative CORS proxy
-          proxyUrl2: `https://corsproxy.io/?${encodeURIComponent(s.file)}`,
-          // Start with proxy (more reliable for cross-origin VTT)
-          url: `https://corsproxy.io/?${encodeURIComponent(s.file)}`,
+          // Direct URL works best in production (corsproxy.io blocks non-localhost)
+          url: s.file,
         }));
 
         // Function to try loading a subtitle with fallback
         const tryLoadSubtitle = async (sub: any) => {
-          // Try corsproxy.io first (most reliable)
-          const urls = [sub.proxyUrl2, sub.proxyUrl1, sub.directUrl];
+          // Try direct first (works in production), then CORS proxy
+          const urls = [sub.directUrl, sub.proxyUrl1];
           for (const url of urls) {
             try {
               const controller = new AbortController();
@@ -558,7 +554,7 @@ export default function Player({
               // Try next URL
             }
           }
-          return sub.proxyUrl2; // Default fallback
+          return sub.directUrl; // Default fallback
         };
 
         // Load default English subtitle with fallback strategy
@@ -572,14 +568,10 @@ export default function Player({
             const workingUrl = await tryLoadSubtitle(defaultSubtitle);
             defaultSubtitle.url = workingUrl;
             art.subtitle.switch(workingUrl, { name: defaultSubtitle.label });
-            // Update all subs to use the same proxy that worked
-            const workingProxy = workingUrl.startsWith("https://corsproxy.io") 
-              ? "corsproxy" 
-              : workingUrl.startsWith(proxy) ? "proxy" : "direct";
+            // Update all subs to use the same strategy that worked
+            const useDirect = !workingUrl.startsWith(proxy);
             subs.forEach((s: any) => {
-              if (workingProxy === "corsproxy") s.url = s.proxyUrl2;
-              else if (workingProxy === "proxy") s.url = s.proxyUrl1;
-              else s.url = s.directUrl;
+              s.url = useDirect ? s.directUrl : s.proxyUrl1;
             });
           } catch (e) {
             console.error("Failed to load default subtitle:", e);
