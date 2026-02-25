@@ -343,6 +343,8 @@ const WatchPage = () => {
                   ? new URL(streamingData.streamingLink.iframe).origin + "/"
                   : window.location.origin + "/",
               }}
+              animeTitle={anime?.title}
+              episodeNumber={currentEpisodeNo}
             />
 
             {/* Mobile Episode List */}
