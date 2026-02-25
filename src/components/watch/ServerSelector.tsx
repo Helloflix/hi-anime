@@ -1,4 +1,4 @@
-import { Captions, Mic, Download, Monitor } from "lucide-react";
+import { Captions, Mic, Download, Monitor, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Server } from "@/types/anime";
 import { M3U8_PROXY_URL } from "@/config/api";
@@ -11,6 +11,8 @@ interface ServerSelectorProps {
   onTypeChange: (type: "sub" | "dub") => void;
   loading?: boolean;
   streamUrl?: string;
+  subtitles?: Array<{ file: string; label: string; kind: string }>;
+  streamHeaders?: Record<string, string>;
 }
 
 const ServerSelector = ({
@@ -21,12 +23,45 @@ const ServerSelector = ({
   onTypeChange,
   loading = false,
   streamUrl,
+  subtitles = [],
+  streamHeaders,
 }: ServerSelectorProps) => {
   const subServers = servers.filter((s) => s.type === "sub");
   const dubServers = servers.filter((s) => s.type === "dub");
 
   const slugifyServer = (name?: string) =>
     (name || "").toString().trim().toLowerCase().replace(/\s+/g, "-");
+
+  const handleDownloadVideo = () => {
+    if (!streamUrl) return;
+    const m3u8proxy = M3U8_PROXY_URL.split(",");
+    const headers = streamHeaders || {};
+    const proxyUrl =
+      m3u8proxy[0] +
+      encodeURIComponent(streamUrl) +
+      "&headers=" +
+      encodeURIComponent(JSON.stringify(headers));
+    window.open(proxyUrl, "_blank");
+  };
+
+  const handleDownloadSubtitle = async (sub: { file: string; label: string }) => {
+    try {
+      const res = await fetch(sub.file);
+      if (!res.ok) throw new Error("Failed to fetch subtitle");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${sub.label || "subtitle"}.vtt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      // Fallback: open in new tab
+      window.open(sub.file, "_blank");
+    }
+  };
 
   const renderServerButtons = (
     serverList: Server[],
@@ -82,6 +117,10 @@ const ServerSelector = ({
     );
   };
 
+  const captionSubs = subtitles.filter(
+    (t) => t.kind === "captions" || t.kind === "subtitles"
+  );
+
   return (
     <div className="bg-[#11101A] rounded-lg p-4 space-y-4">
       <div className="text-center text-sm text-muted-foreground mb-4">
@@ -91,7 +130,6 @@ const ServerSelector = ({
       </div>
 
       <div className="space-y-3">
-        {/* SUB Servers */}
         {renderServerButtons(
           subServers,
           "sub",
@@ -99,8 +137,6 @@ const ServerSelector = ({
           <Captions className="h-4 w-4" />,
           "sub"
         )}
-
-        {/* DUB Servers */}
         {renderServerButtons(
           dubServers,
           "dub",
@@ -110,22 +146,36 @@ const ServerSelector = ({
         )}
       </div>
 
-      {/* Download Button */}
-      {streamUrl && (
-        <div className="flex items-center gap-3 pt-2 border-t border-border/20">
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-8 text-xs bg-green-500/20 text-green-400 border-green-500/30 hover:bg-green-500/30 hover:text-green-300"
-            onClick={() => {
-              const m3u8proxy = M3U8_PROXY_URL.split(",");
-              const proxyUrl = m3u8proxy[0] + encodeURIComponent(streamUrl);
-              window.open(proxyUrl, "_blank");
-            }}
-          >
-            <Download className="h-3.5 w-3.5 mr-1.5" />
-            Download Video
-          </Button>
+      {/* Download Section */}
+      {(streamUrl || captionSubs.length > 0) && (
+        <div className="flex items-center gap-2 flex-wrap pt-2 border-t border-border/20">
+          {streamUrl && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs bg-green-500/20 text-green-400 border-green-500/30 hover:bg-green-500/30 hover:text-green-300"
+              onClick={handleDownloadVideo}
+            >
+              <Download className="h-3.5 w-3.5 mr-1.5" />
+              Download Video
+            </Button>
+          )}
+          {captionSubs.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs bg-blue-500/20 text-blue-400 border-blue-500/30 hover:bg-blue-500/30 hover:text-blue-300"
+              onClick={() => {
+                const englishSub =
+                  captionSubs.find((s) => s.label?.toLowerCase() === "english") ||
+                  captionSubs[0];
+                if (englishSub) handleDownloadSubtitle(englishSub);
+              }}
+            >
+              <FileText className="h-3.5 w-3.5 mr-1.5" />
+              Download Subtitle
+            </Button>
+          )}
         </div>
       )}
     </div>

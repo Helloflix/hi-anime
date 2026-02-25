@@ -337,6 +337,12 @@ const WatchPage = () => {
               onTypeChange={handleTypeChange}
               loading={loadingStream}
               streamUrl={streamUrl}
+              subtitles={allTracks}
+              streamHeaders={{
+                referer: streamingData?.streamingLink?.iframe
+                  ? new URL(streamingData.streamingLink.iframe).origin + "/"
+                  : window.location.origin + "/",
+              }}
             />
 
             {/* Mobile Episode List */}
