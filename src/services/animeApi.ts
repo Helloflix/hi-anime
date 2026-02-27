@@ -72,8 +72,12 @@ export const getStreamingInfo = async (
 };
 
 // Get proxied video URL
-export const getProxiedUrl = (url: string): string => {
-  return `https://proxyfy-two.vercel.app/m3u8-proxy?url=${encodeURIComponent(url)}`;
+export const getProxiedUrl = (url: string, headers?: Record<string, string>): string => {
+  const base = `https://vqzdpbcftwvyerxwkhsj.supabase.co/functions/v1/m3u8-proxy?url=${encodeURIComponent(url)}`;
+  if (headers && Object.keys(headers).length > 0) {
+    return `${base}&headers=${encodeURIComponent(JSON.stringify(headers))}`;
+  }
+  return base;
 };
 
 // Search anime
