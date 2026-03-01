@@ -21,6 +21,7 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import Trending from "./pages/Trending";
 import Auth from "./pages/Auth";
+import PeerTubeWatch from "./pages/PeerTubeWatch";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,7 @@ const App = () => (
           <Route path="/settings" element={<Settings />} />
           <Route path="/trending" element={<Trending />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/pt-watch/:uuid" element={<PeerTubeWatch />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Layout>
