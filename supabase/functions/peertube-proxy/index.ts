@@ -29,7 +29,6 @@ serve(async (req) => {
       });
     }
 
-    // Build the full PeerTube API URL
     const baseUrl = PEERTUBE_URL.replace(/\/$/, "");
     const targetUrl = new URL(path, baseUrl);
 
@@ -47,12 +46,47 @@ serve(async (req) => {
       headers: {
         "User-Agent": "PeerTubeProxy/1.0",
         "ngrok-skip-browser-warning": "true",
-        "Accept": "application/json",
+        "Accept": "*/*",
       },
     });
 
     const contentType = response.headers.get("content-type") || "";
-    
+
+    // For m3u8 playlists - rewrite URLs to go through this proxy
+    if (path.endsWith(".m3u8") || contentType.includes("mpegurl") || contentType.includes("x-mpegURL")) {
+      let m3u8Text = await response.text();
+
+      // Build the proxy base URL (this edge function's URL)
+      const proxyBase = `${url.origin}${url.pathname}`;
+
+      // Rewrite absolute URLs (https://peertube-instance/...)
+      m3u8Text = m3u8Text.replace(
+        new RegExp(baseUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(/[^\\s"]*)', 'g'),
+        (_, p) => `${proxyBase}?path=${encodeURIComponent(p)}`
+      );
+
+      // Rewrite relative URLs (lines that aren't comments and don't start with http)
+      const lines = m3u8Text.split('\n');
+      const rewritten = lines.map(line => {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('#') || trimmed.startsWith('http')) {
+          return line;
+        }
+        // It's a relative path - resolve it relative to the current m3u8 path
+        const parentPath = path.substring(0, path.lastIndexOf('/') + 1);
+        const fullPath = parentPath + trimmed;
+        return `${proxyBase}?path=${encodeURIComponent(fullPath)}`;
+      });
+
+      return new Response(rewritten.join('\n'), {
+        status: response.status,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "application/vnd.apple.mpegurl",
+        },
+      });
+    }
+
     // For JSON responses
     if (contentType.includes("application/json")) {
       const data = await response.json();
@@ -62,7 +96,7 @@ serve(async (req) => {
       });
     }
 
-    // For other responses (video files, etc.), stream them through
+    // For other responses (video segments, images, etc.), stream them through
     const body = await response.arrayBuffer();
     return new Response(body, {
       status: response.status,
