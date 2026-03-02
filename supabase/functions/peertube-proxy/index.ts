@@ -56,8 +56,9 @@ serve(async (req) => {
     if (path.endsWith(".m3u8") || contentType.includes("mpegurl") || contentType.includes("x-mpegURL")) {
       let m3u8Text = await response.text();
 
-      // Build the proxy base URL (this edge function's URL)
-      const proxyBase = `${url.origin}${url.pathname}`;
+      // Build the proxy base URL - must use the public edge function URL
+      const supabaseUrl = Deno.env.get("SUPABASE_URL") || url.origin;
+      const proxyBase = `${supabaseUrl}/functions/v1/peertube-proxy`;
 
       // Rewrite absolute URLs (https://peertube-instance/...)
       m3u8Text = m3u8Text.replace(
