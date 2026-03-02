@@ -75,11 +75,6 @@ const PeerTubePlayer = ({ hlsUrl, poster, title }: PeerTubePlayerProps) => {
             const hls = new Hls({
               maxBufferLength: 30,
               maxMaxBufferLength: 60,
-              xhrSetup: (xhr: XMLHttpRequest, xhrUrl: string) => {
-                // All URLs should already be proxied via m3u8 rewriting
-                // but add ngrok header just in case
-                xhr.setRequestHeader("ngrok-skip-browser-warning", "true");
-              },
             });
             hls.loadSource(url);
             hls.attachMedia(video);
