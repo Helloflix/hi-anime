@@ -45,8 +45,8 @@ const PeerTubePlayer = ({ hlsUrl, poster, title }: PeerTubePlayerProps) => {
     const art = new Artplayer({
       container: containerRef.current,
       url: proxiedM3u8,
+      type: 'm3u8',
       poster: proxiedPoster,
-      // title not in types but works at runtime
       volume: 0.7,
       muted: false,
       autoplay: false,
