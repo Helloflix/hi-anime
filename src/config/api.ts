@@ -1,15 +1,14 @@
 // API Configuration
-// These are public API endpoints used by the application
 
 export const API_URL = 'https://hinime-two.vercel.app/api';
 
 // Proxy server for CORS handling (subtitles, etc.)
 export const PROXY_URL = 'https://zenime-1-qejh.onrender.com/?url=';
 
-// Our own edge function proxy (primary, most reliable)
+// Our own edge function proxy (primary, most reliable — rewrites all m3u8 URLs through itself)
 export const OWN_PROXY_URL = `https://vqzdpbcftwvyerxwkhsj.supabase.co/functions/v1/m3u8-proxy?url=`;
 
-// M3U8 proxy servers for video streaming - multiple for fallback
+// Primary M3U8 proxy — use own proxy only since it handles full URL rewriting
 export const M3U8_PROXY_URL = OWN_PROXY_URL;
 
 // List of M3U8 proxy servers ordered by priority

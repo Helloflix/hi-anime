@@ -46,119 +46,72 @@ const AnimeInfoSection = ({ anime, seasons, currentAnimeId }: AnimeInfoSectionPr
   const description = info?.Overview || "";
   const shouldTruncate = description.length > 300;
   const displayDescription =
-    shouldTruncate && !isExpanded
-      ? description.slice(0, 300) + "..."
-      : description;
+    shouldTruncate && !isExpanded ? description.slice(0, 300) + "..." : description;
 
   return (
-    <div className="bg-[#191826] rounded-lg p-6">
-      <div className="flex gap-6 flex-col md:flex-row">
+    <div className="glass-panel rounded-xl p-5 sm:p-6">
+      <div className="flex gap-5 flex-col md:flex-row">
         {/* Poster */}
         <div className="flex-shrink-0">
           <img
             src={anime.poster}
             alt={anime.title}
-            className="w-32 h-44 object-cover rounded-lg shadow-lg"
+            className="w-28 h-40 object-cover rounded-lg shadow-lg"
           />
         </div>
 
         {/* Info */}
-        <div className="flex-1 space-y-4">
-          {/* Title */}
+        <div className="flex-1 space-y-3">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">{anime.title}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground leading-tight">{anime.title}</h1>
             {anime.japanese_title && (
-              <p className="text-sm text-muted-foreground mt-1">
-                {anime.japanese_title}
-              </p>
+              <p className="text-xs text-muted-foreground mt-1">{anime.japanese_title}</p>
             )}
           </div>
 
           {/* Badges */}
           <div className="flex items-center gap-2 flex-wrap">
             {anime.tvInfo?.rating && (
-              <Badge variant="secondary" className="bg-white/90 text-black">
-                {anime.tvInfo.rating}
-              </Badge>
+              <Badge variant="secondary" className="text-xs">{anime.tvInfo.rating}</Badge>
             )}
             {anime.tvInfo?.quality && (
-              <Badge variant="secondary" className="bg-pink-300 text-black">
-                {anime.tvInfo.quality}
-              </Badge>
+              <Badge className="bg-primary/20 text-primary border-primary/30 text-xs">{anime.tvInfo.quality}</Badge>
             )}
             {anime.tvInfo?.sub && (
-              <Badge variant="secondary" className="bg-green-300 text-black">
-                SUB: {anime.tvInfo.sub}
-              </Badge>
+              <Badge variant="outline" className="text-xs border-green-500/30 text-green-400">SUB: {anime.tvInfo.sub}</Badge>
             )}
             {anime.tvInfo?.dub && (
-              <Badge variant="secondary" className="bg-blue-300 text-black">
-                DUB: {anime.tvInfo.dub}
-              </Badge>
+              <Badge variant="outline" className="text-xs border-blue-500/30 text-blue-400">DUB: {anime.tvInfo.dub}</Badge>
             )}
           </div>
 
           {/* Description */}
           <div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {displayDescription}
-            </p>
+            <p className="text-sm text-muted-foreground leading-relaxed">{displayDescription}</p>
             {shouldTruncate && (
-              <Button
-                variant="link"
-                size="sm"
-                onClick={() => setIsExpanded(!isExpanded)}
-                className="p-0 h-auto text-primary"
-              >
-                {isExpanded ? (
-                  <>
-                    Show less <ChevronUp className="h-4 w-4 ml-1" />
-                  </>
-                ) : (
-                  <>
-                    Show more <ChevronDown className="h-4 w-4 ml-1" />
-                  </>
-                )}
+              <Button variant="link" size="sm" onClick={() => setIsExpanded(!isExpanded)} className="p-0 h-auto text-primary text-xs">
+                {isExpanded ? <>Less <ChevronUp className="h-3 w-3 ml-0.5" /></> : <>More <ChevronDown className="h-3 w-3 ml-0.5" /></>}
               </Button>
             )}
           </div>
 
           {/* Info Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
             {anime.showType && (
-              <div>
-                <span className="text-muted-foreground">Type: </span>
-                <span className="text-foreground">{anime.showType}</span>
-              </div>
+              <div><span className="text-muted-foreground">Type: </span><span className="text-foreground">{anime.showType}</span></div>
             )}
             {info?.Premiered && (
-              <div>
-                <span className="text-muted-foreground">Premiered: </span>
-                <span className="text-foreground">{info.Premiered}</span>
-              </div>
-            )}
-            {info?.Aired && (
-              <div>
-                <span className="text-muted-foreground">Aired: </span>
-                <span className="text-foreground">{info.Aired}</span>
-              </div>
+              <div><span className="text-muted-foreground">Premiered: </span><span className="text-foreground">{info.Premiered}</span></div>
             )}
             {info?.Status && (
-              <div>
-                <span className="text-muted-foreground">Status: </span>
-                <span className="text-foreground">{info.Status}</span>
-              </div>
+              <div><span className="text-muted-foreground">Status: </span><span className="text-foreground">{info.Status}</span></div>
             )}
             {info?.Duration && (
-              <div>
-                <span className="text-muted-foreground">Duration: </span>
-                <span className="text-foreground">{info.Duration}</span>
-              </div>
+              <div><span className="text-muted-foreground">Duration: </span><span className="text-foreground">{info.Duration}</span></div>
             )}
             {info?.["MAL Score"] && (
               <div className="flex items-center gap-1">
-                <span className="text-muted-foreground">MAL: </span>
-                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
+                <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500" />
                 <span className="text-foreground">{info["MAL Score"]}</span>
               </div>
             )}
@@ -167,16 +120,14 @@ const AnimeInfoSection = ({ anime, seasons, currentAnimeId }: AnimeInfoSectionPr
           {/* Genres */}
           {info?.Genres && info.Genres.length > 0 && (
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm text-muted-foreground">Genres:</span>
               {info.Genres.map((genre, idx) => {
-                // Handle both object format { name: string } and string format
-                const genreName = typeof genre === 'string' ? genre : genre?.name;
+                const genreName = typeof genre === "string" ? genre : genre?.name;
                 if (!genreName) return null;
                 return (
                   <Link
                     key={idx}
-                    to={`/genre/${genreName.toLowerCase().replace(/\s+/g, '-')}`}
-                    className="text-sm text-primary hover:underline"
+                    to={`/genre/${genreName.toLowerCase().replace(/\s+/g, "-")}`}
+                    className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
                   >
                     {genreName}
                   </Link>
@@ -184,45 +135,31 @@ const AnimeInfoSection = ({ anime, seasons, currentAnimeId }: AnimeInfoSectionPr
               })}
             </div>
           )}
-
-          {/* Studios */}
-          {info?.Studios && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Studios:</span>
-              <span className="text-sm text-foreground">{info.Studios}</span>
-            </div>
-          )}
         </div>
       </div>
 
       {/* Seasons */}
       {seasons && seasons.length > 0 && (
-        <div className="mt-6 pt-6 border-t border-border/30">
-          <h3 className="text-lg font-semibold mb-4">Seasons</h3>
+        <div className="mt-5 pt-5 border-t border-border/20">
+          <h3 className="text-base font-semibold mb-3">Seasons</h3>
           <div className="flex gap-3 flex-wrap">
             {seasons.map((season) => (
               <Link
                 key={season.id}
                 to={`/watch/${season.id}`}
-                className={`relative w-32 h-16 rounded-lg overflow-hidden group ${
-                  currentAnimeId === season.id
-                    ? "ring-2 ring-primary"
-                    : ""
+                className={`relative w-28 h-14 rounded-lg overflow-hidden group ${
+                  currentAnimeId === season.id ? "ring-2 ring-primary" : ""
                 }`}
               >
                 <img
                   src={season.season_poster}
                   alt={season.season}
-                  className="w-full h-full object-cover blur-[2px] opacity-60 group-hover:opacity-80 transition-opacity"
+                  className="w-full h-full object-cover blur-[2px] opacity-50 group-hover:opacity-70 transition-opacity"
                 />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <span
-                    className={`text-xs font-bold text-center px-2 ${
-                      currentAnimeId === season.id
-                        ? "text-primary"
-                        : "text-white group-hover:text-primary"
-                    } transition-colors`}
-                  >
+                  <span className={`text-xs font-bold text-center px-2 ${
+                    currentAnimeId === season.id ? "text-primary" : "text-foreground group-hover:text-primary"
+                  } transition-colors`}>
                     {season.season}
                   </span>
                 </div>
