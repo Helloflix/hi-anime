@@ -12,7 +12,7 @@ const BottomNavigation = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-[60] md:hidden">
       <div className="bg-background/90 backdrop-blur-2xl supports-[backdrop-filter]:bg-background/70 border-t border-border/20 shadow-2xl">
         <div className="flex items-center justify-around px-2 pb-safe pt-2">
           {navItems.map((item) => (

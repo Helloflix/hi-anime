@@ -4,7 +4,7 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
 };
 
 serve(async (req) => {
@@ -27,14 +27,30 @@ serve(async (req) => {
     const customHeaders: Record<string, string> = {};
     if (headersParam) {
       try {
-        const parsed = JSON.parse(headersParam);
-        Object.assign(customHeaders, parsed);
+        Object.assign(customHeaders, JSON.parse(headersParam));
+      } catch { /* ignore */ }
+    }
+
+    // For HEAD requests, just check if the upstream is reachable
+    if (req.method === "HEAD") {
+      try {
+        const headRes = await fetch(targetUrl, {
+          method: "HEAD",
+          headers: {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            ...customHeaders,
+          },
+          redirect: "follow",
+        });
+        return new Response(null, {
+          status: headRes.ok ? 200 : headRes.status,
+          headers: corsHeaders,
+        });
       } catch {
-        // ignore invalid headers
+        return new Response(null, { status: 502, headers: corsHeaders });
       }
     }
 
-    // Fetch the target URL with custom headers
     const fetchHeaders: Record<string, string> = {
       "User-Agent":
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
@@ -56,11 +72,9 @@ serve(async (req) => {
       );
     }
 
-    // Determine content type
-    const contentType =
-      response.headers.get("content-type") || "application/octet-stream";
+    const contentType = response.headers.get("content-type") || "application/octet-stream";
 
-    // For M3U8 playlists, rewrite relative URLs to absolute
+    // For M3U8 playlists, rewrite ALL URLs to route through this proxy
     if (
       contentType.includes("mpegurl") ||
       contentType.includes("x-mpegurl") ||
@@ -72,32 +86,41 @@ serve(async (req) => {
       const lastSlash = targetUrl.lastIndexOf("/");
       const baseUrl = lastSlash > 8 ? targetUrl.substring(0, lastSlash + 1) : targetUrl;
 
-      // Rewrite relative segment/playlist URLs to absolute
+      // Build the proxy base for rewriting
+      const supabaseUrl = Deno.env.get("SUPABASE_URL") || url.origin;
+      const proxyBase = `${supabaseUrl}/functions/v1/m3u8-proxy`;
+      const encodedHeaders = headersParam ? `&headers=${encodeURIComponent(headersParam)}` : "";
+
+      const wrapUrl = (rawUrl: string): string => {
+        // Make absolute first
+        let absolute = rawUrl;
+        if (!rawUrl.startsWith("http://") && !rawUrl.startsWith("https://")) {
+          try {
+            absolute = new URL(rawUrl, baseUrl).toString();
+          } catch {
+            absolute = baseUrl + rawUrl;
+          }
+        }
+        return `${proxyBase}?url=${encodeURIComponent(absolute)}${encodedHeaders}`;
+      };
+
       const lines = text.split("\n");
       const rewritten = lines.map((line) => {
         const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith("#")) {
-          // Rewrite URI= inside tags like #EXT-X-MAP
-          if (trimmed.includes('URI="')) {
-            return trimmed.replace(/URI="([^"]+)"/g, (_match, uri) => {
-              if (uri.startsWith("http://") || uri.startsWith("https://")) return `URI="${uri}"`;
-              try {
-                return `URI="${new URL(uri, baseUrl).toString()}"`;
-              } catch {
-                return `URI="${baseUrl}${uri}"`;
-              }
-            });
-          }
-          return line;
+        if (!trimmed) return line;
+
+        // Rewrite URI= inside tags like #EXT-X-MAP or #EXT-X-KEY
+        if (trimmed.startsWith("#") && trimmed.includes('URI="')) {
+          return trimmed.replace(/URI="([^"]+)"/g, (_match, uri) => {
+            return `URI="${wrapUrl(uri)}"`;
+          });
         }
-        if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
-          return line;
-        }
-        try {
-          return new URL(trimmed, baseUrl).toString();
-        } catch {
-          return `${baseUrl}${trimmed}`;
-        }
+
+        // Skip other comment lines
+        if (trimmed.startsWith("#")) return line;
+
+        // This is a URL line (segment or sub-playlist) — wrap it through proxy
+        return wrapUrl(trimmed);
       });
 
       return new Response(rewritten.join("\n"), {
