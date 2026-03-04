@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
-import { Play, Star, Calendar, Clock, Subtitles, Mic2 } from "lucide-react";
+import { Play, Calendar, Clock, Subtitles, Mic2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface AnimeCardProps {
@@ -19,105 +18,71 @@ interface AnimeCardProps {
   isDubbed?: boolean;
 }
 
-const AnimeCard = ({ 
-  id, 
-  title, 
-  image, 
-  rating, 
-  year, 
-  episodes, 
-  type, 
-  status, 
-  genres = [],
+const AnimeCard = ({
+  id,
+  title,
+  image,
+  year,
+  episodes,
   subtitle,
   className = "",
-  isDubbed = false
+  isDubbed = false,
 }: AnimeCardProps) => {
   return (
-    <div className={`group relative anime-card overflow-hidden ${className}`}>
-      {/* Image Container */}
+    <Link to={`/anime/${id}`} className={cn("group block anime-card", className)}>
+      {/* Poster */}
       <div className="relative aspect-[3/4] overflow-hidden bg-muted">
         <img
           src={image}
           alt={title}
           loading="lazy"
           decoding="async"
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
-        
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300">
-          <div className="absolute bottom-4 left-4 right-4">
-            <Button
-              size="sm"
-              className="w-full mb-2 bg-primary hover:bg-primary/90 text-primary-foreground h-8 text-xs shadow-lg"
-              asChild
-            >
-              <Link to={`/anime/${id}`}>
-                <Play className="h-3 w-3 mr-1" />
-                Watch Now
-              </Link>
-            </Button>
+
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-primary/90 flex items-center justify-center shadow-lg backdrop-blur-sm translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+            <Play className="h-4 w-4 text-primary-foreground fill-current ml-0.5" />
           </div>
         </div>
 
-        {/* Status Badge */}
-        {status && (
-          <Badge 
-            variant="secondary" 
-            className="absolute top-2 right-2 bg-secondary/90 backdrop-blur-sm"
-          >
-            {status}
-          </Badge>
-        )}
-
-        {/* Rating */}
-        {rating && (
-          <div className="absolute top-2 left-2 flex items-center space-x-1 bg-background/80 backdrop-blur-sm px-2 py-1 rounded">
-            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-            <span className="text-xs font-medium">{rating}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Content */}
-      <div className="p-3 space-y-2">
-        <Link to={`/anime/${id}`} className="block">
-          <h3 className="font-semibold text-sm leading-tight line-clamp-2 group-hover:text-primary transition-colors duration-200">
-            {title}
-          </h3>
-        </Link>
-
-        {/* Meta Information */}
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
-            {year && (
-              <div className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                <span>{year}</span>
-              </div>
-            )}
-            {episodes && (
-              <div className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                <span>{episodes} eps</span>
-              </div>
-            )}
-          </div>
-          
-          <Badge 
-            variant="outline" 
-            className={cn(
-              "text-xs px-2 py-0.5 flex items-center gap-1 w-fit",
-              isDubbed ? "bg-purple-500/10 text-purple-400 border-purple-500/30" : "bg-blue-500/10 text-blue-400 border-blue-500/30"
-            )}
-          >
-            {isDubbed ? <Mic2 className="h-3 w-3" /> : <Subtitles className="h-3 w-3" />}
-            <span>{isDubbed ? "DUB" : "SUB"}</span>
-          </Badge>
+        {/* Language badges - top right */}
+        <div className="absolute top-1.5 right-1.5 flex gap-1">
+          {subtitle && (
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-primary/80 text-primary-foreground backdrop-blur-sm">
+              SUB
+            </span>
+          )}
+          {isDubbed && (
+            <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-secondary text-secondary-foreground backdrop-blur-sm">
+              DUB
+            </span>
+          )}
         </div>
       </div>
-    </div>
+
+      {/* Info */}
+      <div className="p-2.5 space-y-1.5">
+        <h3 className="font-medium text-xs leading-tight line-clamp-2 group-hover:text-primary transition-colors duration-200">
+          {title}
+        </h3>
+        <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+          {year && (
+            <span className="flex items-center gap-0.5">
+              <Calendar className="h-2.5 w-2.5" />
+              {year}
+            </span>
+          )}
+          {episodes !== undefined && episodes > 0 && (
+            <span className="flex items-center gap-0.5">
+              <Clock className="h-2.5 w-2.5" />
+              {episodes} eps
+            </span>
+          )}
+        </div>
+      </div>
+    </Link>
   );
 };
 

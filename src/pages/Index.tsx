@@ -20,18 +20,19 @@ const Index = () => {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
   return (
-    <>
+    <div className="space-y-0">
       <HeroSection />
-      
-      {/* Trending Section */}
+
+      {/* Neon divider */}
+      <div className="neon-line opacity-30 mx-auto max-w-7xl" />
+
       <AnimeSectionGrid
         title="Trending Now"
-        subtitle="Most watched anime this week"
+        subtitle="Most watched this week"
         icon={TrendingUp}
         animeList={homeData?.trending || []}
         viewAllLink="/trending"
@@ -39,10 +40,9 @@ const Index = () => {
         limit={18}
       />
 
-      {/* Top Airing Section */}
       <AnimeSectionGrid
         title="Top Airing"
-        subtitle="Currently broadcasting anime"
+        subtitle="Currently broadcasting"
         icon={Flame}
         animeList={homeData?.topAiring || []}
         viewAllLink="/tv-series"
@@ -50,7 +50,6 @@ const Index = () => {
         limit={12}
       />
 
-      {/* Most Popular Section */}
       <AnimeSectionGrid
         title="Most Popular"
         subtitle="Fan favorites of all time"
@@ -61,36 +60,33 @@ const Index = () => {
         limit={12}
       />
 
-      {/* Most Favorite Section */}
       <AnimeSectionGrid
         title="Most Favorite"
-        subtitle="Highest rated by the community"
+        subtitle="Highest rated by community"
         icon={Heart}
         animeList={homeData?.mostFavorite || []}
         loading={loading}
         limit={12}
       />
 
-      {/* Latest Completed Section */}
       <AnimeSectionGrid
         title="Recently Completed"
-        subtitle="Finished airing anime"
+        subtitle="Finished airing"
         icon={CheckCircle}
         animeList={homeData?.latestCompleted || []}
         loading={loading}
         limit={12}
       />
 
-      {/* Latest Episodes Section */}
       <AnimeSectionGrid
         title="Latest Episodes"
-        subtitle="Newest episodes released"
+        subtitle="Newest releases"
         icon={Clock}
         animeList={homeData?.latestEpisode || []}
         loading={loading}
         limit={18}
       />
-    </>
+    </div>
   );
 };
 

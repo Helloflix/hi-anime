@@ -1,43 +1,60 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Artplayer from "artplayer";
 import Hls from "hls.js";
+import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const PROXY_BASE = `https://vqzdpbcftwvyerxwkhsj.supabase.co/functions/v1/peertube-proxy`;
 
 interface PeerTubePlayerProps {
-  hlsUrl: string; // The raw PeerTube HLS master playlist URL
+  hlsUrl: string;
   poster?: string;
   title?: string;
 }
 
-function getProxiedUrl(peerTubePath: string): string {
-  // Extract path from full PeerTube URL
+function getProxiedUrl(rawUrl: string): string {
   try {
-    const parsed = new URL(peerTubePath);
+    const parsed = new URL(rawUrl);
     const url = new URL(PROXY_BASE);
     url.searchParams.set("path", parsed.pathname);
     return url.toString();
   } catch {
-    // Already a path
     const url = new URL(PROXY_BASE);
-    url.searchParams.set("path", peerTubePath);
+    url.searchParams.set("path", rawUrl);
     return url.toString();
   }
 }
 
 function getProxiedThumbnail(thumbnailPath: string): string {
   if (!thumbnailPath || thumbnailPath === "/placeholder.svg") return "/placeholder.svg";
-  const url = new URL(PROXY_BASE);
-  url.searchParams.set("path", thumbnailPath);
-  return url.toString();
+  try {
+    const parsed = new URL(thumbnailPath);
+    const url = new URL(PROXY_BASE);
+    url.searchParams.set("path", parsed.pathname);
+    return url.toString();
+  } catch {
+    const url = new URL(PROXY_BASE);
+    url.searchParams.set("path", thumbnailPath);
+    return url.toString();
+  }
 }
 
 const PeerTubePlayer = ({ hlsUrl, poster, title }: PeerTubePlayerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const artRef = useRef<Artplayer | null>(null);
+  const hlsRef = useRef<Hls | null>(null);
+  const [playerState, setPlayerState] = useState<"loading" | "ready" | "error">("loading");
+  const [errorMsg, setErrorMsg] = useState("");
 
-  useEffect(() => {
+  const initPlayer = () => {
     if (!containerRef.current || !hlsUrl) return;
+
+    // Cleanup previous
+    if (hlsRef.current) { hlsRef.current.destroy(); hlsRef.current = null; }
+    if (artRef.current) { artRef.current.destroy(false); artRef.current = null; }
+
+    setPlayerState("loading");
+    setErrorMsg("");
 
     const proxiedM3u8 = getProxiedUrl(hlsUrl);
     const proxiedPoster = poster ? getProxiedThumbnail(poster) : undefined;
@@ -45,7 +62,7 @@ const PeerTubePlayer = ({ hlsUrl, poster, title }: PeerTubePlayerProps) => {
     const art = new Artplayer({
       container: containerRef.current,
       url: proxiedM3u8,
-      type: 'm3u8',
+      type: "m3u8",
       poster: proxiedPoster,
       volume: 0.7,
       muted: false,
@@ -53,10 +70,8 @@ const PeerTubePlayer = ({ hlsUrl, poster, title }: PeerTubePlayerProps) => {
       pip: true,
       autoSize: false,
       autoMini: true,
-      screenshot: true,
       setting: true,
       loop: false,
-      flip: true,
       playbackRate: true,
       aspectRatio: true,
       fullscreen: true,
@@ -64,7 +79,7 @@ const PeerTubePlayer = ({ hlsUrl, poster, title }: PeerTubePlayerProps) => {
       miniProgressBar: true,
       mutex: true,
       backdrop: true,
-      theme: "hsl(var(--primary))",
+      theme: "hsl(210, 100%, 60%)",
       lang: "en",
       moreVideoAttr: {
         crossOrigin: "anonymous",
@@ -75,55 +90,96 @@ const PeerTubePlayer = ({ hlsUrl, poster, title }: PeerTubePlayerProps) => {
             const hls = new Hls({
               maxBufferLength: 30,
               maxMaxBufferLength: 60,
+              startLevel: -1,
+              enableWorker: true,
             });
+            hlsRef.current = hls;
+
             hls.loadSource(url);
             hls.attachMedia(video);
+
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+              setPlayerState("ready");
+            });
+
             hls.on(Hls.Events.ERROR, (_, data) => {
-              console.error("HLS error:", data);
+              console.error("PeerTube HLS error:", data);
               if (data.fatal) {
                 switch (data.type) {
                   case Hls.ErrorTypes.NETWORK_ERROR:
-                    console.log("Network error, trying to recover...");
-                    hls.startLoad();
+                    if (data.response && data.response.code === 0) {
+                      setPlayerState("error");
+                      setErrorMsg("Server is offline or unreachable");
+                    } else {
+                      hls.startLoad();
+                    }
                     break;
                   case Hls.ErrorTypes.MEDIA_ERROR:
-                    console.log("Media error, trying to recover...");
                     hls.recoverMediaError();
                     break;
                   default:
+                    setPlayerState("error");
+                    setErrorMsg("Playback failed — stream may be unavailable");
                     hls.destroy();
                     break;
                 }
               }
             });
 
-            // Clean up HLS on art destroy
             art.on("destroy", () => {
               hls.destroy();
+              hlsRef.current = null;
             });
           } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
             video.src = url;
+            setPlayerState("ready");
+          } else {
+            setPlayerState("error");
+            setErrorMsg("Your browser does not support HLS playback");
           }
         },
       },
     });
 
     artRef.current = art;
+  };
 
+  useEffect(() => {
+    initPlayer();
     return () => {
-      if (artRef.current) {
-        artRef.current.destroy(false);
-        artRef.current = null;
-      }
+      if (hlsRef.current) { hlsRef.current.destroy(); hlsRef.current = null; }
+      if (artRef.current) { artRef.current.destroy(false); artRef.current = null; }
     };
-  }, [hlsUrl, poster, title]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hlsUrl, poster]);
 
   return (
-    <div
-      ref={containerRef}
-      className="w-full aspect-video"
-      style={{ maxHeight: "80vh" }}
-    />
+    <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
+      <div ref={containerRef} className="w-full h-full" />
+
+      {/* Loading overlay */}
+      {playerState === "loading" && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm z-10 gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">Loading stream...</p>
+        </div>
+      )}
+
+      {/* Error overlay */}
+      {playerState === "error" && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 backdrop-blur-sm z-10 gap-4 px-6 text-center">
+          <AlertCircle className="h-10 w-10 text-destructive" />
+          <div className="space-y-1">
+            <p className="text-sm font-medium text-foreground">Stream Unavailable</p>
+            <p className="text-xs text-muted-foreground max-w-sm">{errorMsg}</p>
+          </div>
+          <Button size="sm" variant="outline" onClick={initPlayer} className="gap-2">
+            <RefreshCw className="h-3 w-3" />
+            Retry
+          </Button>
+        </div>
+      )}
+    </div>
   );
 };
 

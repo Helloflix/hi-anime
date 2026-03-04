@@ -1,69 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* AnimixPlay clone design system with dark blue theme
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    /* Light mode - clean and modern */
     --background: 0 0% 100%;
     --foreground: 222.2 47.4% 11.2%;
-
-    /* Card backgrounds */
     --card: 0 0% 100%;
     --card-foreground: 222.2 47.4% 11.2%;
-
-    /* Popover styling */
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 47.4% 11.2%;
-
-    /* Blue primary */
     --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 0 0% 100%;
-
-    /* Secondary */
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
-
-    /* Muted elements */
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-
-    /* Accent */
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
-
-    /* Destructive */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
-
-    /* Borders and inputs */
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 217.2 91.2% 59.8%;
-
     --radius: 0.5rem;
 
-    /* Custom gradients for light mode */
-    --animix-gradient: linear-gradient(135deg, hsl(217.2 91.2% 59.8%), hsl(220 80% 50%));
-    --hero-gradient: linear-gradient(180deg, hsl(0 0% 100%), hsl(210 40% 98%));
-    --card-gradient: linear-gradient(135deg, hsl(0 0% 100%), hsl(210 40% 99%));
     --glow-blue: 217.2 91.2% 59.8%;
     --glow-cyan: 190 100% 50%;
-    
-    /* Shadows for light mode */
+    --neon-accent: 190 95% 60%;
+
     --shadow-glow: 0 0 30px hsl(var(--glow-blue) / 0.15);
     --shadow-card: 0 4px 16px hsl(222.2 47.4% 11.2% / 0.08);
-    --shadow-hero: 0 10px 30px hsl(222.2 47.4% 11.2% / 0.1);
 
-    /* Animations */
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-
-    /* Sidebar colors for light mode */
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 222.2 47.4% 11.2%;
     --sidebar-primary: 217.2 91.2% 59.8%;
@@ -75,53 +45,40 @@ All colors MUST be HSL.
   }
 
   .dark {
-    /* Dark mode - AnimixPlay theme */
-    --background: 220 30% 6%;
-    --foreground: 0 0% 95%;
-
-    --card: 220 25% 10%;
-    --card-foreground: 0 0% 92%;
-
-    --popover: 220 30% 8%;
-    --popover-foreground: 0 0% 95%;
-
+    --background: 222 35% 5%;
+    --foreground: 210 20% 92%;
+    --card: 222 28% 9%;
+    --card-foreground: 210 15% 90%;
+    --popover: 222 30% 7%;
+    --popover-foreground: 210 20% 95%;
     --primary: 210 100% 60%;
     --primary-foreground: 0 0% 98%;
-
-    --secondary: 220 25% 14%;
-    --secondary-foreground: 0 0% 85%;
-
-    --muted: 220 20% 12%;
-    --muted-foreground: 0 0% 60%;
-
+    --secondary: 222 25% 13%;
+    --secondary-foreground: 210 10% 85%;
+    --muted: 222 22% 11%;
+    --muted-foreground: 215 12% 55%;
     --accent: 215 80% 30%;
-    --accent-foreground: 0 0% 95%;
-
+    --accent-foreground: 210 20% 95%;
     --destructive: 0 70% 60%;
     --destructive-foreground: 0 0% 98%;
-
-    --border: 220 25% 18%;
-    --input: 220 20% 12%;
+    --border: 222 20% 16%;
+    --input: 222 20% 12%;
     --ring: 210 100% 60%;
 
-    /* Custom gradients for dark mode */
-    --animix-gradient: linear-gradient(135deg, hsl(210 100% 60%), hsl(220 80% 50%));
-    --hero-gradient: linear-gradient(45deg, hsl(220 30% 6%), hsl(215 25% 10%));
-    --card-gradient: linear-gradient(135deg, hsl(220 25% 10%), hsl(215 20% 14%));
-    
-    /* Shadows for dark mode */
-    --shadow-glow: 0 0 30px hsl(var(--glow-blue) / 0.4);
-    --shadow-card: 0 8px 20px hsl(220 30% 3% / 0.6);
-    --shadow-hero: 0 20px 40px hsl(220 30% 2% / 0.8);
+    --glow-blue: 210 100% 60%;
+    --glow-cyan: 190 100% 55%;
+    --neon-accent: 190 95% 60%;
 
-    /* Sidebar colors for dark mode */
-    --sidebar-background: 220 30% 8%;
-    --sidebar-foreground: 0 0% 90%;
+    --shadow-glow: 0 0 40px hsl(var(--glow-blue) / 0.3);
+    --shadow-card: 0 8px 24px hsl(222 35% 2% / 0.6);
+
+    --sidebar-background: 222 30% 7%;
+    --sidebar-foreground: 210 15% 90%;
     --sidebar-primary: 210 100% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 25% 14%;
-    --sidebar-accent-foreground: 0 0% 95%;
-    --sidebar-border: 220 25% 15%;
+    --sidebar-accent: 222 25% 13%;
+    --sidebar-accent-foreground: 210 20% 95%;
+    --sidebar-border: 222 20% 14%;
     --sidebar-ring: 210 100% 65%;
   }
 }
@@ -132,100 +89,116 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground font-sans transition-colors duration-300;
-    background: var(--hero-gradient);
+    @apply bg-background text-foreground transition-colors duration-300;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     min-height: 100vh;
-    font-feature-settings: 'kern' 1, 'liga' 1;
-    text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Custom scrollbar for anime theme */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
+
   ::-webkit-scrollbar {
-    width: 8px;
+    width: 6px;
   }
-
   ::-webkit-scrollbar-track {
-    background: hsl(var(--background));
+    background: transparent;
   }
-
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--primary));
-    border-radius: 4px;
+    background: hsl(var(--primary) / 0.4);
+    border-radius: 3px;
   }
-
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--primary) / 0.8);
+    background: hsl(var(--primary) / 0.6);
   }
 }
 
 @layer components {
-  /* AnimixPlay card component styles */
   .anime-card {
-    background: var(--card-gradient);
-    border: 1px solid hsl(var(--border));
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border) / 0.5);
     border-radius: var(--radius);
-    transition: var(--transition-smooth);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: var(--shadow-card);
     will-change: transform;
+    overflow: hidden;
   }
-
   .anime-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-glow);
-    border-color: hsl(var(--primary) / 0.6);
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-glow), 0 20px 40px hsl(var(--glow-blue) / 0.1);
+    border-color: hsl(var(--primary) / 0.4);
   }
 
-  /* Glow effects for AnimixPlay theme */
-  .glow-effect {
-    box-shadow: 0 0 25px hsl(var(--glow-blue) / 0.5);
-  }
-
-  .text-glow {
-    text-shadow: 0 0 12px hsl(var(--glow-blue) / 0.7);
-  }
-
-  /* Hero section styling */
-  .hero-gradient {
-    background: var(--hero-gradient);
-  }
-
-  .animix-gradient {
-    background: var(--animix-gradient);
-  }
-
-  /* Bottom navigation with glassmorphism */
-  .bottom-nav {
+  .glass-panel {
     backdrop-filter: blur(20px) saturate(180%);
-    background: hsl(var(--card) / 0.8);
-    border: 1px solid hsl(var(--border) / 0.3);
-    box-shadow: 0 -4px 20px hsl(var(--foreground) / 0.05);
+    background: hsl(var(--card) / 0.6);
+    border: 1px solid hsl(var(--border) / 0.15);
   }
-
-  /* Glassmorphism utility classes */
-  .glass {
-    backdrop-filter: blur(20px) saturate(180%);
-    background: hsl(var(--background) / 0.7);
-    border: 1px solid hsl(var(--border) / 0.2);
+  .dark .glass-panel {
+    background: hsl(222 30% 8% / 0.7);
+    border-color: hsl(var(--primary) / 0.08);
+    box-shadow: inset 0 1px 0 hsl(var(--primary) / 0.04);
   }
 
   .glass-card {
     backdrop-filter: blur(24px) saturate(200%);
-    background: hsl(var(--card) / 0.6);
+    background: hsl(var(--card) / 0.55);
+    border: 1px solid hsl(var(--border) / 0.2);
+  }
+
+  .text-glow {
+    text-shadow: 0 0 20px hsl(var(--glow-blue) / 0.5);
+  }
+
+  .neon-line {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, hsl(var(--primary)), hsl(var(--neon-accent)), transparent);
+  }
+
+  .section-header {
+    @apply relative flex items-center gap-3;
+  }
+  .section-header::after {
+    content: '';
+    @apply flex-1 h-px;
+    background: linear-gradient(90deg, hsl(var(--primary) / 0.3), transparent);
+  }
+
+  .bottom-nav {
+    backdrop-filter: blur(20px) saturate(180%);
+    background: hsl(var(--card) / 0.85);
     border: 1px solid hsl(var(--border) / 0.3);
+    box-shadow: 0 -4px 20px hsl(var(--foreground) / 0.05);
   }
 
-  /* Cyberpunk glass panel — used across watch page */
-  .glass-panel {
-    backdrop-filter: blur(16px) saturate(180%);
-    background: hsl(var(--card) / 0.65);
-    border: 1px solid hsl(var(--border) / 0.15);
+  .glow-effect {
+    box-shadow: 0 0 25px hsl(var(--glow-blue) / 0.5);
   }
+}
 
-  .dark .glass-panel {
-    background: hsl(220 30% 8% / 0.75);
-    border-color: hsl(var(--primary) / 0.08);
-    box-shadow: inset 0 1px 0 hsl(var(--primary) / 0.05);
+@layer utilities {
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 0 8px hsl(var(--primary) / 0.4); }
+    50% { box-shadow: 0 0 20px hsl(var(--primary) / 0.6); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .animate-slide-up {
+    animation: slide-up 0.5s ease-out forwards;
+  }
+  .animate-glow-pulse {
+    animation: glow-pulse 2s ease-in-out infinite;
+  }
+  .animate-fade-in {
+    animation: fade-in 0.4s ease-out forwards;
   }
 }

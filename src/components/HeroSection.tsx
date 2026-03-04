@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Play, Info, Star, Calendar, Zap, ChevronLeft, ChevronRight } from "lucide-react";
+import { Play, Info, Zap, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,17 +24,14 @@ const HeroSection = () => {
         setLoading(false);
       }
     };
-
     fetchHomeData();
   }, []);
 
   useEffect(() => {
     if (!isAutoPlaying || spotlights.length === 0) return;
-    
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % spotlights.length);
     }, 6000);
-
     return () => clearInterval(interval);
   }, [isAutoPlaying, spotlights.length]);
 
@@ -52,7 +49,7 @@ const HeroSection = () => {
 
   if (loading) {
     return (
-      <section className="relative min-h-[60vh] md:min-h-[70vh] lg:min-h-[80vh] flex items-center overflow-hidden">
+      <section className="relative min-h-[50vh] md:min-h-[65vh] lg:min-h-[75vh] flex items-end overflow-hidden">
         <Skeleton className="absolute inset-0" />
       </section>
     );
@@ -60,101 +57,82 @@ const HeroSection = () => {
 
   if (spotlights.length === 0) return null;
 
-  const currentAnime = spotlights[currentSlide];
-  const hasValidEpisodeInfo = currentAnime?.tvInfo?.episodeInfo;
-  const episodeCount = hasValidEpisodeInfo 
-    ? (currentAnime.tvInfo.episodeInfo.sub || 0) + (currentAnime.tvInfo.episodeInfo.dub || 0)
-    : currentAnime?.tvInfo?.eps || 0;
+  const anime = spotlights[currentSlide];
+  const hasEpisodeInfo = anime?.tvInfo?.episodeInfo;
+  const episodeCount = hasEpisodeInfo
+    ? (anime.tvInfo.episodeInfo.sub || 0) + (anime.tvInfo.episodeInfo.dub || 0)
+    : anime?.tvInfo?.eps || 0;
 
   return (
-    <section className="relative min-h-[60vh] md:min-h-[70vh] lg:min-h-[80vh] flex items-center overflow-hidden">
-      {/* Background Images with Smooth Transition */}
+    <section className="relative min-h-[50vh] md:min-h-[65vh] lg:min-h-[75vh] flex items-end overflow-hidden">
+      {/* Background */}
       <div className="absolute inset-0">
-        {spotlights.map((anime, index) => (
+        {spotlights.map((s, i) => (
           <div
-            key={anime.id}
-            className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${
-              index === currentSlide ? 'opacity-100' : 'opacity-0'
-            }`}
+            key={s.id}
+            className={`absolute inset-0 transition-opacity duration-1000 ${i === currentSlide ? 'opacity-100' : 'opacity-0'}`}
           >
             <img
-              src={anime.poster}
-              alt={anime.title}
-              loading={index === 0 ? "eager" : "lazy"}
-              fetchPriority={index === 0 ? "high" : "auto"}
-              className="w-full h-full object-cover"
+              src={s.poster}
+              alt={s.title}
+              loading={i === 0 ? "eager" : "lazy"}
+              fetchPriority={i === 0 ? "high" : "auto"}
+              className="w-full h-full object-cover scale-105"
             />
           </div>
         ))}
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-background/10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent" />
+        {/* Cinematic overlays */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
+        <div className="absolute bottom-0 left-0 right-0 h-px neon-line opacity-40" />
       </div>
 
       {/* Content */}
-      <div className="relative z-10 container max-w-7xl px-4 md:px-6 py-8 md:py-16 lg:py-20 mx-auto">
-        <div className="max-w-2xl space-y-3 md:space-y-5 animate-slide-up">
-          {/* Spotlight Badge */}
-          <div className="flex items-center space-x-2">
-            <Badge className="bg-primary/20 text-primary border-primary/30 animate-glow-pulse">
-              <Zap className="h-3 w-3 mr-1" />
-              #{currentSlide + 1} Spotlight
-            </Badge>
-          </div>
+      <div className="relative z-10 container max-w-7xl px-4 md:px-6 pb-10 md:pb-14 lg:pb-20 mx-auto">
+        <div className="max-w-xl space-y-4 animate-slide-up">
+          <Badge className="bg-primary/15 text-primary border-primary/25 backdrop-blur-sm text-xs">
+            <Zap className="h-3 w-3 mr-1" />
+            #{currentSlide + 1} Spotlight
+          </Badge>
 
-          {/* Title */}
-          <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-bold leading-tight text-glow">
-            {currentAnime.title}
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-[1.1] tracking-tight text-glow">
+            {anime.title}
           </h1>
 
-          {/* Meta Info */}
-          <div className="flex items-center flex-wrap gap-2 text-xs sm:text-sm">
-            {currentAnime.tvInfo?.quality && (
-              <Badge className="bg-primary/20 text-primary border-primary/30 text-xs">
-                {currentAnime.tvInfo.quality}
+          <div className="flex items-center flex-wrap gap-2 text-xs">
+            {anime.tvInfo?.quality && (
+              <Badge className="bg-primary/20 text-primary border-primary/30 text-[10px] font-semibold">
+                {anime.tvInfo.quality}
               </Badge>
             )}
-            {currentAnime.tvInfo?.showType && (
-              <Badge variant="outline" className="bg-card/50 backdrop-blur-sm text-xs">
-                {currentAnime.tvInfo.showType}
+            {anime.tvInfo?.showType && (
+              <Badge variant="outline" className="bg-card/40 backdrop-blur-sm text-[10px]">
+                {anime.tvInfo.showType}
               </Badge>
             )}
             {episodeCount > 0 && (
-              <Badge variant="outline" className="bg-card/50 backdrop-blur-sm text-xs">
-                {episodeCount} episodes
+              <Badge variant="outline" className="bg-card/40 backdrop-blur-sm text-[10px]">
+                {episodeCount} eps
               </Badge>
-            )}
-            {currentAnime.tvInfo?.duration && (
-              <span className="text-muted-foreground hidden sm:inline">{currentAnime.tvInfo.duration}</span>
             )}
           </div>
 
-          {/* Description */}
-          {currentAnime.description && (
-            <p className="text-xs sm:text-sm md:text-base text-muted-foreground line-clamp-2 md:line-clamp-3 max-w-xl hidden sm:block">
-              {currentAnime.description}
+          {anime.description && (
+            <p className="text-sm text-muted-foreground line-clamp-2 max-w-lg hidden sm:block leading-relaxed">
+              {anime.description}
             </p>
           )}
 
-          {/* Action Buttons */}
-          <div className="flex items-center space-x-2 sm:space-x-3 pt-2 md:pt-4">
-            <Button 
-              size="sm"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold animate-glow-pulse h-8 sm:h-9 md:h-10 text-xs sm:text-sm"
-              asChild
-            >
-              <Link to={`/watch/${currentAnime.id}`}>
-                <Play className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                Watch
+          <div className="flex items-center gap-3 pt-2">
+            <Button size="sm" className="animate-glow-pulse font-semibold" asChild>
+              <Link to={`/watch/${anime.id}`}>
+                <Play className="h-4 w-4 mr-1.5 fill-current" />
+                Watch Now
               </Link>
             </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="bg-card/50 backdrop-blur-sm border-border hover:bg-card/70 h-8 sm:h-9 md:h-10 text-xs sm:text-sm"
-              asChild
-            >
-              <Link to={`/anime/${currentAnime.id}`}>
-                <Info className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+            <Button variant="outline" size="sm" className="bg-card/40 backdrop-blur-sm border-border/50" asChild>
+              <Link to={`/anime/${anime.id}`}>
+                <Info className="h-4 w-4 mr-1.5" />
                 Details
               </Link>
             </Button>
@@ -162,38 +140,31 @@ const HeroSection = () => {
         </div>
       </div>
 
-      {/* Navigation Arrows */}
-      <Button
-        variant="ghost"
-        size="sm"
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 bg-background/20 backdrop-blur-sm hover:bg-background/40"
+      {/* Navigation */}
+      <button
+        className="absolute left-3 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-background/20 backdrop-blur-sm hover:bg-background/40 transition-colors"
         onClick={prevSlide}
       >
-        <ChevronLeft className="h-6 w-6" />
-      </Button>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 bg-background/20 backdrop-blur-sm hover:bg-background/40"
+        <ChevronLeft className="h-5 w-5" />
+      </button>
+      <button
+        className="absolute right-3 top-1/2 -translate-y-1/2 z-20 p-2 rounded-full bg-background/20 backdrop-blur-sm hover:bg-background/40 transition-colors"
         onClick={nextSlide}
       >
-        <ChevronRight className="h-6 w-6" />
-      </Button>
+        <ChevronRight className="h-5 w-5" />
+      </button>
 
-      {/* Slide Indicators */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex space-x-2">
-        {spotlights.map((_, index) => (
+      {/* Progress dots */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
+        {spotlights.map((_, i) => (
           <button
-            key={index}
-            className={`w-3 h-3 rounded-full transition-all ${
-              index === currentSlide 
-                ? 'bg-primary scale-125' 
-                : 'bg-white/30 hover:bg-white/50'
+            key={i}
+            className={`rounded-full transition-all duration-300 ${
+              i === currentSlide
+                ? 'w-6 h-1.5 bg-primary'
+                : 'w-1.5 h-1.5 bg-foreground/20 hover:bg-foreground/40'
             }`}
-            onClick={() => {
-              setCurrentSlide(index);
-              setIsAutoPlaying(false);
-            }}
+            onClick={() => { setCurrentSlide(i); setIsAutoPlaying(false); }}
           />
         ))}
       </div>
