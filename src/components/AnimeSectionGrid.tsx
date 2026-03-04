@@ -28,15 +28,12 @@ const AnimeSectionGrid = ({
 }: AnimeSectionGridProps) => {
   if (loading) {
     return (
-      <section className="py-4 md:py-8 lg:py-12">
-        <div className="container px-3 md:px-4">
-          <div className="flex items-center justify-between mb-4 md:mb-8">
-            <Skeleton className="h-10 w-48" />
-            {viewAllLink && <Skeleton className="h-10 w-32" />}
-          </div>
+      <section className="py-6 md:py-10">
+        <div className="container max-w-7xl px-4">
+          <Skeleton className="h-8 w-48 mb-6" />
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
             {Array.from({ length: limit }).map((_, i) => (
-              <Skeleton key={i} className="aspect-[2/3] w-full" />
+              <Skeleton key={i} className="aspect-[3/4] w-full rounded-lg" />
             ))}
           </div>
         </div>
@@ -49,53 +46,49 @@ const AnimeSectionGrid = ({
   const displayList = animeList.slice(0, limit);
 
   return (
-    <section className="py-4 md:py-8 lg:py-12">
-      <div className="container px-3 md:px-4">
-        {/* Section Header */}
-        <div className="flex items-center justify-between mb-4 md:mb-8">
-          <div className="flex items-center space-x-2 md:space-x-3">
-            <div className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-lg bg-primary/20 backdrop-blur-sm">
-              <Icon className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+    <section className="py-6 md:py-10">
+      <div className="container max-w-7xl px-4">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-5 md:mb-7">
+          <div className="section-header flex-1 min-w-0">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/15 border border-primary/20">
+              <Icon className="h-4 w-4 text-primary" />
             </div>
-            <div>
-              <h2 className="text-xl md:text-2xl lg:text-3xl font-bold">{title}</h2>
+            <div className="min-w-0">
+              <h2 className="text-lg md:text-xl lg:text-2xl font-bold tracking-tight">{title}</h2>
               {subtitle && (
-                <p className="text-muted-foreground text-xs md:text-sm hidden sm:block">{subtitle}</p>
+                <p className="text-muted-foreground text-xs hidden sm:block mt-0.5">{subtitle}</p>
               )}
             </div>
           </div>
 
           {viewAllLink && (
-            <Button variant="ghost" className="hidden sm:flex h-8 md:h-10 text-sm" asChild>
+            <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-primary shrink-0" asChild>
               <Link to={viewAllLink}>
                 View All
-                <ChevronRight className="h-3 w-3 md:h-4 md:w-4 ml-1" />
+                <ChevronRight className="h-3 w-3 ml-0.5" />
               </Link>
             </Button>
           )}
         </div>
 
-        {/* Anime Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4 lg:gap-5">
+        {/* Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
           {displayList.map((anime, index) => {
             const hasEpisodeInfo = anime.tvInfo?.episodeInfo;
             const subCount = hasEpisodeInfo ? anime.tvInfo.episodeInfo.sub : anime.tvInfo?.sub || 0;
             const dubCount = hasEpisodeInfo ? anime.tvInfo.episodeInfo.dub : anime.tvInfo?.dub || 0;
             const totalEpisodes = anime.tvInfo?.eps || subCount + dubCount;
-
-            // Extract year from releaseDate if available
             const yearMatch = anime.tvInfo?.releaseDate?.match(/(\d{4})/);
             const yearNumber = yearMatch ? parseInt(yearMatch[1]) : undefined;
 
             return (
               <div key={anime.id} className="relative group">
-                {/* Rank Number */}
                 {showRank && (
-                  <div className="absolute -top-1.5 -left-1.5 md:-top-2 md:-left-2 z-10 flex items-center justify-center w-6 h-6 md:w-8 md:h-8 rounded-full bg-primary text-primary-foreground font-bold text-xs md:text-sm shadow-lg">
+                  <div className="absolute -top-1 -left-1 z-10 flex items-center justify-center w-6 h-6 rounded-md bg-primary text-primary-foreground font-bold text-[10px] shadow-lg">
                     {String(index + 1).padStart(2, "0")}
                   </div>
                 )}
-
                 <AnimeCard
                   id={anime.id}
                   title={anime.title}
@@ -103,7 +96,6 @@ const AnimeSectionGrid = ({
                   year={yearNumber}
                   episodes={totalEpisodes}
                   type={anime.tvInfo?.showType || "TV"}
-                  genres={[]}
                   subtitle={subCount > 0 ? "SUB" : undefined}
                   isDubbed={dubCount > 0}
                   className="h-full"
@@ -113,13 +105,12 @@ const AnimeSectionGrid = ({
           })}
         </div>
 
-        {/* Mobile View All Button */}
         {viewAllLink && (
           <div className="flex justify-center mt-6 sm:hidden">
-            <Button variant="outline" className="w-full max-w-xs text-sm" asChild>
+            <Button variant="outline" size="sm" className="w-full max-w-xs text-xs" asChild>
               <Link to={viewAllLink}>
                 View All {title}
-                <ChevronRight className="h-4 w-4 ml-1" />
+                <ChevronRight className="h-3 w-3 ml-1" />
               </Link>
             </Button>
           </div>
