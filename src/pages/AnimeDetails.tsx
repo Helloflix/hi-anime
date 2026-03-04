@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Play, Star, ArrowLeft, Calendar, Clock, Award, Film, Users, Tag, BookOpen, Tv, RefreshCw } from "lucide-react";
+import { Play, Star, ArrowLeft, Calendar, Clock, Award, Film, Users, Tag, BookOpen, Tv, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAnimeDetails, getEpisodes } from "@/services/animeApi";
 import type { AnimeDetails as AnimeDetailsType, Episode } from "@/types/anime";
 
@@ -40,6 +38,28 @@ interface AnimeDetailsResponse {
   related_data?: RelatedAnime[];
 }
 
+const InfoRow = ({ label, value, icon: Icon }: { label: string; value: string; icon?: any }) => (
+  <div className="flex justify-between items-center py-2.5 border-b border-border/10 last:border-0">
+    <span className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+      {Icon && <Icon className="h-3.5 w-3.5 text-primary/70" />}
+      {label}
+    </span>
+    <span className="text-sm font-medium text-foreground">{value}</span>
+  </div>
+);
+
+const SectionHeader = ({ icon: Icon, title, count }: { icon: any; title: string; count?: number }) => (
+  <div className="flex items-center gap-2.5 mb-4">
+    <div className="p-1.5 rounded-md bg-primary/10">
+      <Icon className="h-4 w-4 text-primary" />
+    </div>
+    <h2 className="text-base font-semibold tracking-tight text-foreground">
+      {title}
+      {count !== undefined && <span className="text-muted-foreground font-normal ml-1.5">({count})</span>}
+    </h2>
+  </div>
+);
+
 const AnimeDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -48,6 +68,8 @@ const AnimeDetails = () => {
   const [loading, setLoading] = useState(true);
   const [loadingEpisodes, setLoadingEpisodes] = useState(false);
   const [error, setError] = useState(false);
+  const [synopsisExpanded, setSynopsisExpanded] = useState(false);
+  const [showAllEpisodes, setShowAllEpisodes] = useState(false);
 
   const fetchDetails = async () => {
     if (!id) return;
@@ -87,19 +109,16 @@ const AnimeDetails = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="container px-4 py-4">
-          <Skeleton className="h-10 w-32 mb-4" />
+        <div className="relative h-[45vh]">
+          <Skeleton className="h-full w-full" />
         </div>
-        <Skeleton className="h-[50vh] w-full" />
-        <div className="container px-4 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-4">
+        <div className="max-w-6xl mx-auto px-4 -mt-24 relative z-10">
+          <div className="flex gap-6">
+            <Skeleton className="w-48 h-72 rounded-xl shrink-0" />
+            <div className="flex-1 space-y-4 pt-8">
               <Skeleton className="h-8 w-3/4" />
-              <Skeleton className="h-32 w-full" />
-              <Skeleton className="h-48 w-full" />
-            </div>
-            <div>
-              <Skeleton className="h-96 w-full" />
+              <Skeleton className="h-4 w-1/2" />
+              <Skeleton className="h-20 w-full" />
             </div>
           </div>
         </div>
@@ -110,15 +129,13 @@ const AnimeDetails = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="max-w-md w-full mx-4">
-          <CardContent className="pt-6 text-center">
-            <p className="text-destructive mb-4">Failed to load anime details</p>
-            <Button onClick={fetchDetails} variant="outline" size="sm" className="gap-2">
-              <RefreshCw className="h-4 w-4" />
-              Try Again
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="glass-panel rounded-2xl p-8 text-center max-w-sm">
+          <p className="text-destructive mb-4 text-sm">Failed to load anime details</p>
+          <Button onClick={fetchDetails} variant="outline" size="sm" className="gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Try Again
+          </Button>
+        </div>
       </div>
     );
   }
@@ -128,387 +145,278 @@ const AnimeDetails = () => {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <p className="text-muted-foreground mb-4">Anime not found</p>
-          <Button onClick={() => navigate('/')} variant="outline" size="sm">
-            Back to Home
-          </Button>
+          <Button onClick={() => navigate('/')} variant="outline" size="sm">Back to Home</Button>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      <div className="container px-4 py-4">
-        <Button variant="ghost" size="sm" className="gap-2" asChild>
-          <Link to="/">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Home
-          </Link>
-        </Button>
-      </div>
+  const overview = anime.animeInfo?.Overview || "";
+  const shouldTruncate = overview.length > 250;
+  const displayOverview = shouldTruncate && !synopsisExpanded ? overview.slice(0, 250) + "..." : overview;
+  const visibleEpisodes = showAllEpisodes ? episodes : episodes.slice(0, 24);
 
-      {/* Hero Banner Section */}
-      <div className="relative h-[40vh] md:h-[50vh] overflow-hidden">
-        <img 
-          src={anime.poster} 
-          alt={anime.title} 
+  return (
+    <div className="min-h-screen bg-background pb-24">
+      {/* Hero Banner */}
+      <div className="relative h-[45vh] md:h-[55vh] overflow-hidden">
+        <img
+          src={anime.poster}
+          alt={anime.title}
           loading="eager"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover scale-105 blur-[2px]"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/70 to-background/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-        
-        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
-          <div className="container">
-            <div className="max-w-4xl space-y-2 md:space-y-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge className="bg-primary/20 text-primary border-primary/30 backdrop-blur-sm">
-                  {anime.animeInfo.Status}
-                </Badge>
-                <Badge variant="outline" className="backdrop-blur-sm bg-background/20">
-                  {anime.showType}
-                </Badge>
-                {anime.animeInfo["MAL Score"] && (
-                  <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30 backdrop-blur-sm gap-1">
-                    <Star className="h-3 w-3 fill-yellow-400" />
-                    {anime.animeInfo["MAL Score"]}
-                  </Badge>
-                )}
-                {anime.animeInfo.Duration && (
-                  <Badge variant="outline" className="backdrop-blur-sm bg-background/20 gap-1">
-                    <Clock className="h-3 w-3" />
-                    {anime.animeInfo.Duration}
-                  </Badge>
-                )}
-              </div>
-              
-              <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold leading-tight">
-                {anime.title}
-              </h1>
-              
-              <p className="text-sm md:text-base text-muted-foreground">{anime.japanese_title}</p>
-            </div>
-          </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/20" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background/80 via-transparent to-transparent" />
+
+        {/* Back Button */}
+        <div className="absolute top-4 left-4 z-10">
+          <Button variant="ghost" size="sm" className="glass-panel gap-2 text-xs hover:bg-primary/10" asChild>
+            <Link to="/">
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Back
+            </Link>
+          </Button>
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="border-b border-border/20 bg-background/95 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container px-4 py-3">
-          <div className="flex flex-wrap gap-3">
+      {/* Main Content — overlaps the hero */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 -mt-32 md:-mt-40 relative z-10">
+        <div className="flex flex-col md:flex-row gap-6">
+          {/* Poster Card */}
+          <div className="shrink-0 flex flex-col items-center md:items-start">
+            <div className="w-40 md:w-48 rounded-xl overflow-hidden shadow-2xl ring-1 ring-border/20">
+              <img
+                src={anime.poster}
+                alt={anime.title}
+                className="w-full aspect-[2/3] object-cover"
+              />
+            </div>
+            {/* Play Button — below poster on desktop */}
             {episodes.length > 0 && (
-              <Button size="lg" className="gap-2" asChild>
+              <Button size="lg" className="w-full mt-3 gap-2 rounded-xl shadow-lg shadow-primary/20" asChild>
                 <Link to={`/watch/${id}?ep=${episodes[0].episode_no || 1}`}>
-                  <Play className="h-5 w-5" />
-                  Watch Episode 1
+                  <Play className="h-4 w-4 fill-current" />
+                  Watch Now
                 </Link>
               </Button>
             )}
-            <Button variant="outline" size="lg" className="gap-2">
-              <BookOpen className="h-5 w-5" />
-              Add to List
-            </Button>
           </div>
-        </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="container px-4 py-6 md:py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Synopsis Section */}
-            {anime.animeInfo.Overview && (
-              <Card className="border-border/50">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BookOpen className="h-5 w-5 text-primary" />
-                    Synopsis
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground leading-relaxed text-sm md:text-base">
-                    {anime.animeInfo.Overview}
-                  </p>
-                </CardContent>
-              </Card>
+          {/* Title & Meta */}
+          <div className="flex-1 min-w-0 space-y-4 pt-2 md:pt-8">
+            <div>
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold tracking-tight leading-tight text-foreground">
+                {anime.title}
+              </h1>
+              {anime.japanese_title && (
+                <p className="text-xs text-muted-foreground mt-1 tracking-wide">{anime.japanese_title}</p>
+              )}
+            </div>
+
+            {/* Badges Row */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {anime.animeInfo?.["MAL Score"] && (
+                <Badge className="bg-yellow-500/15 text-yellow-400 border-yellow-500/25 gap-1 text-xs">
+                  <Star className="h-3 w-3 fill-yellow-400" />
+                  {anime.animeInfo["MAL Score"]}
+                </Badge>
+              )}
+              {anime.animeInfo?.Status && (
+                <Badge className="bg-primary/10 text-primary border-primary/20 text-xs">{anime.animeInfo.Status}</Badge>
+              )}
+              {anime.showType && (
+                <Badge variant="outline" className="text-xs">{anime.showType}</Badge>
+              )}
+              {anime.animeInfo?.Duration && (
+                <Badge variant="outline" className="text-xs gap-1">
+                  <Clock className="h-3 w-3" />
+                  {anime.animeInfo.Duration}
+                </Badge>
+              )}
+              {(anime as any).tvInfo?.quality && (
+                <Badge className="bg-accent/20 text-accent-foreground border-accent/30 text-xs">{(anime as any).tvInfo.quality}</Badge>
+              )}
+              {(anime as any).tvInfo?.sub && (
+                <Badge variant="outline" className="text-xs border-primary/25 text-primary">SUB {(anime as any).tvInfo.sub}</Badge>
+              )}
+              {(anime as any).tvInfo?.dub && (
+                <Badge variant="outline" className="text-xs border-accent/25 text-accent-foreground">DUB {(anime as any).tvInfo.dub}</Badge>
+              )}
+            </div>
+
+            {/* Synopsis */}
+            {overview && (
+              <div>
+                <p className="text-sm text-muted-foreground leading-relaxed">{displayOverview}</p>
+                {shouldTruncate && (
+                  <button
+                    onClick={() => setSynopsisExpanded(!synopsisExpanded)}
+                    className="text-xs text-primary hover:text-primary/80 mt-1 flex items-center gap-0.5 transition-colors"
+                  >
+                    {synopsisExpanded ? <>Less <ChevronUp className="h-3 w-3" /></> : <>More <ChevronDown className="h-3 w-3" /></>}
+                  </button>
+                )}
+              </div>
             )}
 
-            {/* Episodes Section */}
+            {/* Genres */}
+            {anime.animeInfo?.Genres && anime.animeInfo.Genres.length > 0 && (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {anime.animeInfo.Genres.map((genre, idx) => (
+                  <Link
+                    key={idx}
+                    to={`/genre/${genre.name?.toLowerCase().replace(/\s+/g, "-")}`}
+                    className="text-[11px] px-2.5 py-1 rounded-full bg-primary/8 text-primary hover:bg-primary/15 transition-colors border border-primary/10"
+                  >
+                    {genre.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-5 mt-8">
+          {/* Left Column */}
+          <div className="space-y-5">
+            {/* Episodes */}
             {episodes.length > 0 && (
-              <Card className="border-border/50">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Tv className="h-5 w-5 text-primary" />
-                    Episodes ({episodes.length})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {loadingEpisodes ? (
-                    <div className="flex items-center justify-center py-8">
-                      <RefreshCw className="h-6 w-6 animate-spin text-primary" />
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                      {episodes.slice(0, 20).map((episode) => (
+              <div className="glass-panel rounded-xl p-5">
+                <SectionHeader icon={Tv} title="Episodes" count={episodes.length} />
+                {loadingEpisodes ? (
+                  <div className="flex items-center justify-center py-8">
+                    <RefreshCw className="h-5 w-5 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <>
+                    <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-1.5">
+                      {visibleEpisodes.map((episode) => (
                         <Link
                           key={episode.id}
                           to={`/watch/${id}?ep=${episode.episode_no}`}
-                          className="group relative overflow-hidden rounded-lg border border-border/50 hover:border-primary/50 transition-all hover:shadow-lg"
+                          className="group relative aspect-square flex items-center justify-center rounded-lg bg-secondary/30 hover:bg-primary/15 border border-border/10 hover:border-primary/30 transition-all text-sm font-medium text-foreground hover:text-primary"
                         >
-                          <div className="aspect-video bg-muted/20 flex items-center justify-center relative">
-                            <Play className="h-8 w-8 text-primary opacity-70 group-hover:opacity-100 transition-opacity" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                          </div>
-                          <div className="p-2 bg-card/50 backdrop-blur-sm">
-                            <p className="text-xs font-medium line-clamp-1">
-                              Episode {episode.episode_no}
-                            </p>
-                            {episode.title && (
-                              <p className="text-[10px] text-muted-foreground line-clamp-1">
-                                {episode.title}
-                              </p>
-                            )}
-                          </div>
+                          {episode.episode_no}
                         </Link>
                       ))}
                     </div>
-                  )}
-                  {episodes.length > 20 && (
-                    <div className="mt-4 text-center">
-                      <p className="text-sm text-muted-foreground">
-                        Showing 20 of {episodes.length} episodes
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                    {episodes.length > 24 && (
+                      <button
+                        onClick={() => setShowAllEpisodes(!showAllEpisodes)}
+                        className="mt-3 text-xs text-primary hover:text-primary/80 flex items-center gap-1 mx-auto transition-colors"
+                      >
+                        {showAllEpisodes ? "Show Less" : `Show All ${episodes.length} Episodes`}
+                        {showAllEpisodes ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                      </button>
+                    )}
+                  </>
+                )}
+              </div>
             )}
 
-            {/* Genres Section */}
-            {anime.animeInfo.Genres && anime.animeInfo.Genres.length > 0 && (
-              <Card className="border-border/50">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Tag className="h-5 w-5 text-primary" />
-                    Genres
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {anime.animeInfo.Genres.map((genre, index) => (
-                      <Badge key={index} variant="secondary" className="text-sm hover:bg-secondary/80 transition-colors">
-                        {genre.name}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Producers Section */}
-            {anime.animeInfo.Producers && anime.animeInfo.Producers.length > 0 && (
-              <Card className="border-border/50">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5 text-primary" />
-                    Producers
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2">
-                    {anime.animeInfo.Producers.map((producer, index) => (
-                      <Badge key={index} variant="outline" className="text-sm hover:bg-accent transition-colors">
-                        {producer.name}
-                      </Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Seasons Section */}
+            {/* Seasons */}
             {animeData?.seasons && animeData.seasons.length > 0 && (
-              <Card className="border-border/50">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Tv className="h-5 w-5 text-primary" />
-                    Seasons ({animeData.seasons.length})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                    {animeData.seasons.map((season) => (
-                      <Link 
-                        key={season.id} 
-                        to={`/anime/${season.id}`}
-                        className="group relative overflow-hidden rounded-lg border border-border/50 hover:border-primary/50 transition-all hover:shadow-lg"
-                      >
-                        <div className="aspect-[3/4] relative">
-                          <img 
-                            src={season.season_poster} 
-                            alt={season.title}
-                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                          <div className="absolute bottom-0 left-0 right-0 p-2 translate-y-2 group-hover:translate-y-0 transition-transform">
-                            <p className="text-xs font-medium line-clamp-2">{season.title}</p>
-                            <p className="text-[10px] text-muted-foreground">{season.season}</p>
-                          </div>
+              <div className="glass-panel rounded-xl p-5">
+                <SectionHeader icon={Tv} title="Seasons" count={animeData.seasons.length} />
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                  {animeData.seasons.map((season) => (
+                    <Link
+                      key={season.id}
+                      to={`/anime/${season.id}`}
+                      className={`group relative overflow-hidden rounded-lg border transition-all hover:shadow-lg ${
+                        season.id === id ? "border-primary/50 ring-1 ring-primary/20" : "border-border/20 hover:border-primary/30"
+                      }`}
+                    >
+                      <div className="aspect-[3/4] relative">
+                        <img src={season.season_poster} alt={season.title} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+                        <div className="absolute bottom-0 inset-x-0 p-2">
+                          <p className="text-[11px] font-medium line-clamp-2 text-foreground">{season.season}</p>
                         </div>
-                      </Link>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
             )}
 
-            {/* Related Anime Section */}
+            {/* Related Anime */}
             {animeData?.related_data && animeData.related_data.length > 0 && (
-              <Card className="border-border/50">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Film className="h-5 w-5 text-primary" />
-                    Related Anime ({animeData.related_data.length})
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                    {animeData.related_data.slice(0, 8).map((related) => (
-                      <Link 
-                        key={related.id} 
-                        to={`/anime/${related.id}`}
-                        className="group relative overflow-hidden rounded-lg border border-border/50 hover:border-primary/50 transition-all hover:shadow-lg"
-                      >
-                        <div className="aspect-[3/4] relative">
-                          <img 
-                            src={related.poster} 
-                            alt={related.title}
-                            className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                          />
-                          <div className="absolute top-2 right-2 flex gap-1">
-                            {related.tvInfo?.sub > 0 && (
-                              <Badge className="text-[10px] px-1.5 py-0 h-5 bg-primary/90">
-                                SUB {related.tvInfo.sub}
-                              </Badge>
-                            )}
-                            {related.tvInfo?.dub > 0 && (
-                              <Badge className="text-[10px] px-1.5 py-0 h-5 bg-secondary/90">
-                                DUB {related.tvInfo.dub}
-                              </Badge>
-                            )}
-                          </div>
-                          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                          <div className="absolute bottom-0 left-0 right-0 p-2 translate-y-2 group-hover:translate-y-0 transition-transform">
-                            <p className="text-xs font-medium line-clamp-2">{related.title}</p>
-                            <p className="text-[10px] text-muted-foreground">{related.tvInfo?.showType}</p>
-                          </div>
+              <div className="glass-panel rounded-xl p-5">
+                <SectionHeader icon={Film} title="Related" count={animeData.related_data.length} />
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                  {animeData.related_data.slice(0, 10).map((related) => (
+                    <Link
+                      key={related.id}
+                      to={`/anime/${related.id}`}
+                      className="group relative overflow-hidden rounded-lg border border-border/20 hover:border-primary/30 transition-all hover:shadow-lg"
+                    >
+                      <div className="aspect-[3/4] relative">
+                        <img src={related.poster} alt={related.title} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
+                        <div className="absolute top-1.5 right-1.5 flex gap-1">
+                          {related.tvInfo?.sub > 0 && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-primary/80 text-primary-foreground font-medium">SUB</span>
+                          )}
+                          {related.tvInfo?.dub > 0 && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded bg-secondary/80 text-secondary-foreground font-medium">DUB</span>
+                          )}
                         </div>
-                      </Link>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                        <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+                        <div className="absolute bottom-0 inset-x-0 p-2">
+                          <p className="text-[11px] font-medium line-clamp-2 text-foreground">{related.title}</p>
+                          <p className="text-[10px] text-muted-foreground">{related.tvInfo?.showType}</p>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Producers */}
+            {anime.animeInfo?.Producers && anime.animeInfo.Producers.length > 0 && (
+              <div className="glass-panel rounded-xl p-5">
+                <SectionHeader icon={Users} title="Producers" />
+                <div className="flex flex-wrap gap-2">
+                  {anime.animeInfo.Producers.map((producer, idx) => (
+                    <Badge key={idx} variant="outline" className="text-xs">{producer.name}</Badge>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
 
-          {/* Right Column - Information Card */}
-          <div className="space-y-4">
-            <Card className="overflow-hidden border-border/50 sticky top-20">
-              <CardHeader className="bg-gradient-to-br from-primary/10 to-primary/5 border-b border-border/50">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Film className="h-5 w-5 text-primary" />
-                  Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 space-y-3">
-                {anime.animeInfo["MAL Score"] && (
-                  <>
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-sm text-muted-foreground flex items-center gap-2">
-                        <Award className="h-4 w-4" />
-                        MAL Score
-                      </span>
-                      <span className="font-semibold flex items-center gap-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        {anime.animeInfo["MAL Score"]}
-                      </span>
-                    </div>
-                    <Separator />
-                  </>
-                )}
-                
-                {anime.showType && (
-                  <>
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-sm text-muted-foreground">Type</span>
-                      <Badge variant="secondary">{anime.showType}</Badge>
-                    </div>
-                    <Separator />
-                  </>
-                )}
-                
-                {anime.animeInfo.Status && (
-                  <>
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-sm text-muted-foreground">Status</span>
-                      <Badge className="bg-primary/20 text-primary border-primary/30">
-                        {anime.animeInfo.Status}
-                      </Badge>
-                    </div>
-                    <Separator />
-                  </>
-                )}
-                
-                {anime.animeInfo.Premiered && (
-                  <>
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-sm text-muted-foreground flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        Premiered
-                      </span>
-                      <span className="font-medium text-sm">{anime.animeInfo.Premiered}</span>
-                    </div>
-                    <Separator />
-                  </>
-                )}
-                
-                {anime.animeInfo.Aired && (
-                  <>
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-sm text-muted-foreground">Aired</span>
-                      <span className="font-medium text-sm text-right max-w-[60%]">
-                        {anime.animeInfo.Aired}
-                      </span>
-                    </div>
-                    <Separator />
-                  </>
-                )}
-                
-                {anime.animeInfo.Duration && (
-                  <>
-                    <div className="flex justify-between items-center py-2">
-                      <span className="text-sm text-muted-foreground flex items-center gap-2">
-                        <Clock className="h-4 w-4" />
-                        Duration
-                      </span>
-                      <span className="font-medium text-sm">{anime.animeInfo.Duration}</span>
-                    </div>
-                    <Separator />
-                  </>
-                )}
-                
-                {anime.animeInfo.Studios && (
-                  <div className="flex justify-between items-start py-2">
-                    <span className="text-sm text-muted-foreground">Studios</span>
-                    <span className="font-medium text-sm text-right max-w-[60%]">
-                      {anime.animeInfo.Studios}
-                    </span>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+          {/* Right Column — Info Sidebar */}
+          <div>
+            <div className="glass-panel rounded-xl p-5 sticky top-20 space-y-1">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-1.5 rounded-md bg-primary/10">
+                  <Film className="h-4 w-4 text-primary" />
+                </div>
+                <h3 className="text-sm font-semibold tracking-tight">Information</h3>
+              </div>
+
+              {anime.animeInfo?.["MAL Score"] && (
+                <div className="flex justify-between items-center py-2.5 border-b border-border/10">
+                  <span className="text-xs uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                    <Award className="h-3.5 w-3.5 text-primary/70" />
+                    Score
+                  </span>
+                  <span className="text-sm font-semibold flex items-center gap-1">
+                    <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                    {anime.animeInfo["MAL Score"]}
+                  </span>
+                </div>
+              )}
+              {anime.showType && <InfoRow label="Type" value={anime.showType} />}
+              {anime.animeInfo?.Status && <InfoRow label="Status" value={anime.animeInfo.Status} />}
+              {anime.animeInfo?.Premiered && <InfoRow label="Premiered" value={anime.animeInfo.Premiered} icon={Calendar} />}
+              {anime.animeInfo?.Aired && <InfoRow label="Aired" value={anime.animeInfo.Aired} />}
+              {anime.animeInfo?.Duration && <InfoRow label="Duration" value={anime.animeInfo.Duration} icon={Clock} />}
+              {anime.animeInfo?.Studios && <InfoRow label="Studios" value={anime.animeInfo.Studios} />}
+            </div>
           </div>
         </div>
       </div>
