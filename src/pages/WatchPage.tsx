@@ -199,7 +199,8 @@ const WatchPage = () => {
           });
         }
 
-        const streamUrl = info?.streamingLink?.link?.file;
+        const sl = Array.isArray(info?.streamingLink) ? info.streamingLink[0] : info?.streamingLink;
+        const streamUrl = sl?.link?.file;
         if (!streamUrl) {
           // No stream URL - try next server
           console.log(`[AutoFallback] No stream URL from ${currentType}:${currentServer}`);
