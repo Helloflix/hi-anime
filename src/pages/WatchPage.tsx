@@ -280,13 +280,14 @@ const WatchPage = () => {
     }
   };
 
-  const streamUrl = streamingData?.streamingLink?.link?.file;
-  const allTracks = streamingData?.streamingLink?.tracks || [];
+  const sl = Array.isArray(streamingData?.streamingLink) ? streamingData.streamingLink[0] : streamingData?.streamingLink;
+  const streamUrl = sl?.link?.file;
+  const allTracks = sl?.tracks || [];
   const subtitles = allTracks.filter((t: any) => t.kind === "captions" || t.kind === "subtitles");
   const thumbnailTrack = allTracks.find((t: any) => t.kind === "thumbnails");
-  const intro = streamingData?.streamingLink?.intro;
-  const outro = streamingData?.streamingLink?.outro;
-  const thumbnail = thumbnailTrack?.file || streamingData?.streamingLink?.thumbnail;
+  const intro = sl?.intro;
+  const outro = sl?.outro;
+  const thumbnail = thumbnailTrack?.file || sl?.thumbnail;
 
   const currentIdx = episodes.findIndex((ep) => ep.episode_no === currentEpisodeNo);
   const hasPrev = currentIdx > 0;
