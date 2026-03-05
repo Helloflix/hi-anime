@@ -28,4 +28,4 @@ export const forwardIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="50" h
 
 export const backwardIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="currentColor"><path d="M11.99 5V1l-5 5 5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6h-2c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>';
 
-export const logo = '<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="8" fill="url(#paint0_linear)"/><path d="M20 10L13 30H17L20 22L23 30H27L20 10Z" fill="white"/><defs><linearGradient id="paint0_linear" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse"><stop stop-color="#FF6B9D"/><stop offset="1" stop-color="#C084FC"/></linearGradient></defs></svg>';
+export const logo = '';
