@@ -4,6 +4,7 @@ const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
 };
 
 serve(async (req) => {
@@ -52,38 +53,63 @@ serve(async (req) => {
 
     const contentType = response.headers.get("content-type") || "";
 
-    // For m3u8 playlists - rewrite URLs to go through this proxy
-    if (path.endsWith(".m3u8") || contentType.includes("mpegurl") || contentType.includes("x-mpegURL")) {
-      let m3u8Text = await response.text();
+    // Build proxy base URL for rewriting
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") || url.origin;
+    const proxyBase = `${supabaseUrl}/functions/v1/peertube-proxy`;
 
-      // Build the proxy base URL - must use the public edge function URL
-      const supabaseUrl = Deno.env.get("SUPABASE_URL") || url.origin;
-      const proxyBase = `${supabaseUrl}/functions/v1/peertube-proxy`;
-
-      // Rewrite absolute URLs (https://peertube-instance/...)
-      m3u8Text = m3u8Text.replace(
-        new RegExp(baseUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(/[^\\s"]*)', 'g'),
-        (_, p) => `${proxyBase}?path=${encodeURIComponent(p)}`
-      );
-
-      // Rewrite relative URLs (lines that aren't comments and don't start with http)
-      const lines = m3u8Text.split('\n');
-      const rewritten = lines.map(line => {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith('#') || trimmed.startsWith('http')) {
-          return line;
+    // Helper to wrap a raw URL (relative or absolute) through this proxy
+    const wrapUrl = (rawUrl: string): string => {
+      let resolvedPath = rawUrl;
+      if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) {
+        // Extract just the pathname from absolute URL
+        try {
+          const parsed = new URL(rawUrl);
+          resolvedPath = parsed.pathname;
+        } catch {
+          resolvedPath = rawUrl;
         }
-        // It's a relative path - resolve it relative to the current m3u8 path
-        const parentPath = path.substring(0, path.lastIndexOf('/') + 1);
-        const fullPath = parentPath + trimmed;
-        return `${proxyBase}?path=${encodeURIComponent(fullPath)}`;
+      } else if (!rawUrl.startsWith("/")) {
+        // Relative path - resolve relative to current m3u8 path
+        const parentPath = path.substring(0, path.lastIndexOf("/") + 1);
+        resolvedPath = parentPath + rawUrl;
+      }
+      return `${proxyBase}?path=${encodeURIComponent(resolvedPath)}`;
+    };
+
+    // For m3u8 playlists - rewrite ALL URLs to go through this proxy
+    if (path.endsWith(".m3u8") || contentType.includes("mpegurl") || contentType.includes("x-mpegURL")) {
+      const m3u8Text = await response.text();
+
+      const lines = m3u8Text.split("\n");
+      const rewritten = lines.map((line) => {
+        const trimmed = line.trim();
+        if (!trimmed) return line;
+
+        // Rewrite URI="..." inside tags like #EXT-X-MAP or #EXT-X-KEY
+        if (trimmed.startsWith("#") && trimmed.includes('URI="')) {
+          return trimmed.replace(/URI="([^"]+)"/g, (_match, uri) => {
+            return `URI="${wrapUrl(uri)}"`;
+          });
+        }
+
+        // Skip other comment lines
+        if (trimmed.startsWith("#")) return line;
+
+        // URL line (segment or sub-playlist) — wrap through proxy
+        if (trimmed.startsWith("http")) {
+          return wrapUrl(trimmed);
+        }
+
+        // Relative path
+        return wrapUrl(trimmed);
       });
 
-      return new Response(rewritten.join('\n'), {
+      return new Response(rewritten.join("\n"), {
         status: response.status,
         headers: {
           ...corsHeaders,
           "Content-Type": "application/vnd.apple.mpegurl",
+          "Cache-Control": "no-cache",
         },
       });
     }
@@ -104,6 +130,8 @@ serve(async (req) => {
       headers: {
         ...corsHeaders,
         "Content-Type": contentType || "application/octet-stream",
+        "Content-Length": body.byteLength.toString(),
+        "Cache-Control": "public, max-age=3600",
       },
     });
   } catch (error) {

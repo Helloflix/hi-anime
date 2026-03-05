@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Artplayer from "artplayer";
 import Hls from "hls.js";
-import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { Loader2, AlertCircle, RefreshCw, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const PROXY_BASE = `https://vqzdpbcftwvyerxwkhsj.supabase.co/functions/v1/peertube-proxy`;
@@ -59,6 +59,8 @@ const PeerTubePlayer = ({ hlsUrl, poster, title }: PeerTubePlayerProps) => {
     const proxiedM3u8 = getProxiedUrl(hlsUrl);
     const proxiedPoster = poster ? getProxiedThumbnail(poster) : undefined;
 
+    console.log("[PeerTubePlayer] Loading HLS:", proxiedM3u8);
+
     const art = new Artplayer({
       container: containerRef.current,
       url: proxiedM3u8,
@@ -79,7 +81,7 @@ const PeerTubePlayer = ({ hlsUrl, poster, title }: PeerTubePlayerProps) => {
       miniProgressBar: true,
       mutex: true,
       backdrop: true,
-      theme: "hsl(210, 100%, 60%)",
+      theme: "hsl(262, 83%, 58%)",
       lang: "en",
       moreVideoAttr: {
         crossOrigin: "anonymous",
@@ -92,34 +94,38 @@ const PeerTubePlayer = ({ hlsUrl, poster, title }: PeerTubePlayerProps) => {
               maxMaxBufferLength: 60,
               startLevel: -1,
               enableWorker: true,
+              debug: false,
             });
             hlsRef.current = hls;
 
             hls.loadSource(url);
             hls.attachMedia(video);
 
-            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            hls.on(Hls.Events.MANIFEST_PARSED, (_event, data) => {
+              console.log("[PeerTubePlayer] Manifest parsed, levels:", data.levels.length);
               setPlayerState("ready");
             });
 
             hls.on(Hls.Events.ERROR, (_, data) => {
-              console.error("PeerTube HLS error:", data);
+              console.error("[PeerTubePlayer] HLS error:", data.type, data.details, data.response?.code);
               if (data.fatal) {
                 switch (data.type) {
                   case Hls.ErrorTypes.NETWORK_ERROR:
                     if (data.response && data.response.code === 0) {
                       setPlayerState("error");
-                      setErrorMsg("Server is offline or unreachable");
+                      setErrorMsg("Server is offline or unreachable. Check if your PeerTube instance is running.");
                     } else {
+                      console.log("[PeerTubePlayer] Attempting recovery from network error...");
                       hls.startLoad();
                     }
                     break;
                   case Hls.ErrorTypes.MEDIA_ERROR:
+                    console.log("[PeerTubePlayer] Attempting recovery from media error...");
                     hls.recoverMediaError();
                     break;
                   default:
                     setPlayerState("error");
-                    setErrorMsg("Playback failed — stream may be unavailable");
+                    setErrorMsg(`Playback failed: ${data.details}`);
                     hls.destroy();
                     break;
                 }
@@ -154,28 +160,36 @@ const PeerTubePlayer = ({ hlsUrl, poster, title }: PeerTubePlayerProps) => {
   }, [hlsUrl, poster]);
 
   return (
-    <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
+    <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-border/20 shadow-2xl">
       <div ref={containerRef} className="w-full h-full" />
 
       {/* Loading overlay */}
       {playerState === "loading" && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm z-10 gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading stream...</p>
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/85 backdrop-blur-md z-10 gap-4">
+          <div className="relative">
+            <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
+            <Loader2 className="h-10 w-10 animate-spin text-primary relative z-10" />
+          </div>
+          <div className="text-center space-y-1">
+            <p className="text-sm font-medium text-foreground">Loading Stream</p>
+            <p className="text-xs text-muted-foreground">Connecting to server...</p>
+          </div>
         </div>
       )}
 
       {/* Error overlay */}
       {playerState === "error" && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 backdrop-blur-sm z-10 gap-4 px-6 text-center">
-          <AlertCircle className="h-10 w-10 text-destructive" />
-          <div className="space-y-1">
-            <p className="text-sm font-medium text-foreground">Stream Unavailable</p>
-            <p className="text-xs text-muted-foreground max-w-sm">{errorMsg}</p>
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 backdrop-blur-md z-10 gap-5 px-6 text-center">
+          <div className="w-16 h-16 rounded-full bg-destructive/10 border border-destructive/20 flex items-center justify-center">
+            <AlertCircle className="h-8 w-8 text-destructive" />
           </div>
-          <Button size="sm" variant="outline" onClick={initPlayer} className="gap-2">
-            <RefreshCw className="h-3 w-3" />
-            Retry
+          <div className="space-y-2 max-w-sm">
+            <p className="text-base font-semibold text-foreground">Stream Unavailable</p>
+            <p className="text-xs text-muted-foreground leading-relaxed">{errorMsg}</p>
+          </div>
+          <Button size="sm" variant="outline" onClick={initPlayer} className="gap-2 border-primary/30 hover:bg-primary/10">
+            <RefreshCw className="h-3.5 w-3.5" />
+            Retry Connection
           </Button>
         </div>
       )}
