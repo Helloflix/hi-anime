@@ -16,7 +16,7 @@ export const fullScreenOnIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="
 
 export const fullScreenOffIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>';
 
-export const loadingIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" fill="currentColor"><path d="M25 5A20.14 20.14 0 0 0 5 22.4a2.51 2.51 0 0 0 2.5 2.5h.5a2.51 2.51 0 0 0 2.5-2.5A12.58 12.58 0 1 1 25 35a12.58 12.58 0 0 1-12.5-12.5 2.51 2.51 0 0 0-2.5-2.5h-.5a2.51 2.51 0 0 0-2.5 2.5A20.14 20.14 0 0 0 25 45a20.14 20.14 0 0 0 20-20A20.14 20.14 0 0 0 25 5Z"><animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="0.6s" repeatCount="indefinite"/></path></svg>';
+export const loadingIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="white" stroke-width="3"><circle cx="20" cy="20" r="16" opacity="0.25" /><path d="M36 20a16 16 0 0 1-16 16" stroke-linecap="round"><animateTransform attributeName="transform" type="rotate" from="0 20 20" to="360 20 20" dur="0.75s" repeatCount="indefinite"/></path></svg>';
 
 export const captionIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 7H9.5v-.5h-2v3h2V13H11v1c0 .55-.45 1-1 1H7c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v1zm7 0h-1.5v-.5h-2v3h2V13H18v1c0 .55-.45 1-1 1h-3c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1v1z"/></svg>';
 
@@ -28,4 +28,4 @@ export const forwardIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="50" h
 
 export const backwardIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="currentColor"><path d="M11.99 5V1l-5 5 5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6h-2c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>';
 
-export const logo = '<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="8" fill="url(#paint0_linear)"/><path d="M20 10L13 30H17L20 22L23 30H27L20 10Z" fill="white"/><defs><linearGradient id="paint0_linear" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse"><stop stop-color="#FF6B9D"/><stop offset="1" stop-color="#C084FC"/></linearGradient></defs></svg>';
+export const logo = '';

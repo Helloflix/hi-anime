@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useSearchParams, Link } from "react-router-dom";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const slugifyServer = (name?: string) =>
   (name || "").toString().trim().toLowerCase().replace(/\s+/g, "-");
+
+const STREAM_LOAD_TIMEOUT_MS = 15000; // 15s before trying next server
 
 const WatchPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -37,6 +39,10 @@ const WatchPage = () => {
   const [autoPlay, setAutoPlay] = useState(true);
   const [autoNext, setAutoNext] = useState(true);
   const [autoSkip, setAutoSkip] = useState(true);
+  const [streamError, setStreamError] = useState(false);
+  const [allServersFailed, setAllServersFailed] = useState(false);
+  const failedServersRef = useRef<Set<string>>(new Set());
+  const fallbackTimeoutRef = useRef<any>(null);
 
   // Fetch anime details
   useEffect(() => {
@@ -90,6 +96,13 @@ const WatchPage = () => {
     return currentEpisode.id;
   }, [currentEpisode]);
 
+  // Reset failed servers on episode change
+  useEffect(() => {
+    failedServersRef.current.clear();
+    setAllServersFailed(false);
+    setStreamError(false);
+  }, [currentEpisodeNo]);
+
   // Fetch servers
   useEffect(() => {
     const fetchServers = async () => {
@@ -120,25 +133,100 @@ const WatchPage = () => {
     fetchServers();
   }, [currentEpisode?.id, getEpisodeIdForApi]);
 
-  // Fetch streaming info
+  // Get the next available server for fallback
+  const getNextServer = useCallback((): { serverId: string; type: "sub" | "dub" } | null => {
+    const currentKey = `${currentType}:${currentServer}`;
+    failedServersRef.current.add(currentKey);
+
+    // Try same type first, then other type
+    const typesToTry: ("sub" | "dub")[] = [currentType, currentType === "sub" ? "dub" : "sub"];
+    
+    for (const type of typesToTry) {
+      const typeServers = servers.filter((s) => s.type === type);
+      for (const server of typeServers) {
+        const serverId = slugifyServer(server.server_name || server.serverName);
+        const key = `${type}:${serverId}`;
+        if (!failedServersRef.current.has(key)) {
+          return { serverId, type };
+        }
+      }
+    }
+    return null; // All servers tried
+  }, [servers, currentServer, currentType]);
+
+  // Auto-fallback to next server
+  const tryNextServer = useCallback(() => {
+    const next = getNextServer();
+    if (next) {
+      console.log(`[AutoFallback] Switching to server: ${next.type}:${next.serverId}`);
+      setCurrentType(next.type);
+      setCurrentServer(next.serverId);
+      setStreamError(false);
+    } else {
+      console.log("[AutoFallback] All servers failed");
+      setAllServersFailed(true);
+      setLoadingStream(false);
+    }
+  }, [getNextServer]);
+
+  // Fetch streaming info with timeout fallback
   useEffect(() => {
     const fetchStream = async () => {
       const episodeApiId = getEpisodeIdForApi();
       if (!episodeApiId || !currentServer) return;
       setLoadingStream(true);
+      setStreamError(false);
+
+      // Clear previous timeout
+      if (fallbackTimeoutRef.current) clearTimeout(fallbackTimeoutRef.current);
+
+      // Set a timeout - if stream doesn't load in time, try next server
+      fallbackTimeoutRef.current = setTimeout(() => {
+        console.log(`[AutoFallback] Timeout on ${currentType}:${currentServer}`);
+        tryNextServer();
+      }, STREAM_LOAD_TIMEOUT_MS);
+
       try {
         const info = await getStreamingInfo(episodeApiId, currentServer, currentType);
-        if (info.servers && info.servers.length > 0) setServers(info.servers);
+        
+        // Merge servers from streaming response (may have more servers)
+        if (info.servers && info.servers.length > 0) {
+          setServers(prev => {
+            // Merge: keep existing + add new ones
+            const existingIds = new Set(prev.map(s => `${s.type}:${s.data_id}`));
+            const newServers = info.servers.filter(s => !existingIds.has(`${s.type}:${s.data_id}`));
+            return newServers.length > 0 ? [...prev, ...newServers] : prev;
+          });
+        }
+
+        const sl = Array.isArray(info?.streamingLink) ? info.streamingLink[0] : info?.streamingLink;
+        const streamUrl = sl?.link?.file;
+        if (!streamUrl) {
+          // No stream URL - try next server
+          console.log(`[AutoFallback] No stream URL from ${currentType}:${currentServer}`);
+          if (fallbackTimeoutRef.current) clearTimeout(fallbackTimeoutRef.current);
+          tryNextServer();
+          return;
+        }
+
+        if (fallbackTimeoutRef.current) clearTimeout(fallbackTimeoutRef.current);
         setStreamingData(info);
       } catch (error) {
         console.error("Failed to fetch streaming info:", error);
-        setStreamingData(null);
+        if (fallbackTimeoutRef.current) clearTimeout(fallbackTimeoutRef.current);
+        // Auto-fallback on error
+        tryNextServer();
+        return;
       } finally {
         setLoadingStream(false);
       }
     };
     fetchStream();
-  }, [currentEpisode?.id, currentServer, currentType, getEpisodeIdForApi]);
+
+    return () => {
+      if (fallbackTimeoutRef.current) clearTimeout(fallbackTimeoutRef.current);
+    };
+  }, [currentEpisode?.id, currentServer, currentType, getEpisodeIdForApi, tryNextServer]);
 
   const handleEpisodeChange = useCallback((episodeNo: number) => {
     setCurrentEpisodeNo(episodeNo);
@@ -164,6 +252,10 @@ const WatchPage = () => {
   );
 
   const handleServerChange = (serverId: string, type: "sub" | "dub") => {
+    // Manual server change - reset failed list
+    failedServersRef.current.clear();
+    setAllServersFailed(false);
+    setStreamError(false);
     setCurrentServer(serverId);
     setCurrentType(type);
   };
@@ -176,13 +268,26 @@ const WatchPage = () => {
     }
   };
 
-  const streamUrl = streamingData?.streamingLink?.link?.file;
-  const allTracks = streamingData?.streamingLink?.tracks || [];
+  const handleRetryAll = () => {
+    failedServersRef.current.clear();
+    setAllServersFailed(false);
+    setStreamError(false);
+    // Re-trigger by resetting to first server
+    const subServers = servers.filter((s) => s.type === "sub");
+    if (subServers.length > 0) {
+      setCurrentType("sub");
+      setCurrentServer(slugifyServer(subServers[0].server_name || subServers[0].serverName));
+    }
+  };
+
+  const sl = Array.isArray(streamingData?.streamingLink) ? streamingData.streamingLink[0] : streamingData?.streamingLink;
+  const streamUrl = sl?.link?.file;
+  const allTracks = sl?.tracks || [];
   const subtitles = allTracks.filter((t: any) => t.kind === "captions" || t.kind === "subtitles");
   const thumbnailTrack = allTracks.find((t: any) => t.kind === "thumbnails");
-  const intro = streamingData?.streamingLink?.intro;
-  const outro = streamingData?.streamingLink?.outro;
-  const thumbnail = thumbnailTrack?.file || streamingData?.streamingLink?.thumbnail;
+  const intro = sl?.intro;
+  const outro = sl?.outro;
+  const thumbnail = thumbnailTrack?.file || sl?.thumbnail;
 
   const currentIdx = episodes.findIndex((ep) => ep.episode_no === currentEpisodeNo);
   const hasPrev = currentIdx > 0;
@@ -238,8 +343,17 @@ const WatchPage = () => {
             {/* Video Player */}
             <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden max-w-full shadow-[0_0_40px_rgba(0,0,0,0.5)]">
               {loadingStream ? (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                  <div className="w-10 h-10 border-3 border-white/20 border-t-primary rounded-full animate-spin" />
+                  <p className="text-xs text-muted-foreground">Loading stream...</p>
+                </div>
+              ) : allServersFailed ? (
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-muted-foreground p-4 gap-3">
+                  <p className="text-center text-sm font-medium text-destructive">All servers failed to load</p>
+                  <p className="text-center text-xs text-muted-foreground">None of the available servers could provide a stream</p>
+                  <Button size="sm" variant="outline" onClick={handleRetryAll} className="mt-2">
+                    Retry All Servers
+                  </Button>
                 </div>
               ) : streamUrl ? (
                 <Player

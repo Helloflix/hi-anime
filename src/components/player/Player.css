@@ -24,6 +24,61 @@
   font-weight: inherit !important;
   white-space: inherit !important;
 }
+
+/* ===== PROGRESS BAR FIX - Make it visible ===== */
+.art-progress {
+  height: 6px !important;
+}
+.art-progress .art-control-progress {
+  height: 100% !important;
+}
+.art-progress .art-control-progress .art-control-progress-inner {
+  height: 100% !important;
+  background: rgba(255,255,255,0.2) !important;
+}
+.art-progress .art-control-progress .art-control-progress-inner .art-progress-loaded {
+  background: rgba(255,255,255,0.35) !important;
+  height: 100% !important;
+}
+.art-progress .art-control-progress .art-control-progress-inner .art-progress-played {
+  background: hsl(262, 83%, 58%) !important;
+  height: 100% !important;
+}
+.art-progress .art-control-progress .art-control-progress-inner .art-progress-highlight {
+  height: 100% !important;
+}
+.art-progress .art-control-progress .art-control-progress-inner .art-progress-indicator {
+  border: 2px solid hsl(262, 83%, 58%) !important;
+  background: #fff !important;
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 50% !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  box-shadow: 0 0 6px rgba(139, 92, 246, 0.6) !important;
+}
+.art-progress:hover {
+  height: 8px !important;
+}
+.art-progress:hover .art-control-progress .art-control-progress-inner .art-progress-indicator {
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* ===== Classic loading spinner ===== */
+.art-loading .art-icon {
+  animation: art-classic-spin 0.8s linear infinite !important;
+}
+@keyframes art-classic-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ===== Hide watermark logo layer ===== */
+.art-layer-website_logo {
+  display: none !important;
+}
+
 @media screen and (max-width: 370px) {
   .art-progress {
     padding-bottom: 5px !important;
