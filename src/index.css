@@ -177,6 +177,35 @@
   .glow-effect {
     box-shadow: 0 0 25px hsl(var(--glow-blue) / 0.5);
   }
+
+  /* Cyberpunk Sidebar */
+  .sidebar-cyberpunk-bg {
+    background: hsl(240 30% 4%) !important;
+    background-image: 
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        hsl(180 100% 50% / 0.01) 2px,
+        hsl(180 100% 50% / 0.01) 4px
+      );
+  }
+
+  .sidebar-cyberpunk [data-sidebar="sidebar"] {
+    background: transparent !important;
+  }
+
+  /* Hide sidebar scrollbar */
+  .sidebar-cyberpunk [data-sidebar="content"],
+  .sidebar-cyberpunk-bg {
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .sidebar-cyberpunk [data-sidebar="content"]::-webkit-scrollbar,
+  .sidebar-cyberpunk-bg::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 @layer utilities {

@@ -10,7 +10,7 @@ const Contact = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-glow mb-4">Contact Us</h1>
         <p className="text-muted-foreground">
-          Get in touch with the AnimixPlay team. We'd love to hear from you!
+          Get in touch with the Helloflix team. We'd love to hear from you!
         </p>
       </div>
 

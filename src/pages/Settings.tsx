@@ -32,7 +32,7 @@ const Settings = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-glow mb-4">Settings</h1>
         <p className="text-muted-foreground">
-          Customize your AnimixPlay experience
+          Customize your Helloflix experience
         </p>
       </div>
 

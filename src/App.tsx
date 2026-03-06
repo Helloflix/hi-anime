@@ -19,7 +19,7 @@ import SearchPage from "./pages/SearchPage";
 import Contact from "./pages/Contact";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
-import Trending from "./pages/Trending";
+
 import Auth from "./pages/Auth";
 import PeerTubeWatch from "./pages/PeerTubeWatch";
 
@@ -47,7 +47,7 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
-          <Route path="/trending" element={<Trending />} />
+          
           <Route path="/auth" element={<Auth />} />
           <Route path="/pt-watch/:uuid" element={<PeerTubeWatch />} />
           <Route path="*" element={<NotFound />} />

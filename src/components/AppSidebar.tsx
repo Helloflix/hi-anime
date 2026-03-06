@@ -1,4 +1,4 @@
-import { Home, Search, TrendingUp, User, Settings, List, Film, Tv, Star, Play, Mic2, Subtitles, ChevronDown, HelpCircle } from "lucide-react";
+import { Home, Star, List, Film, Tv, Subtitles, Mic2, Settings, HelpCircle, User, Play, History, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   Sidebar,
@@ -10,76 +10,66 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const mainItems = [
   { title: "Home", url: "/", icon: Home },
-  { title: "Search", url: "/search", icon: Search },
-  { title: "Trending", url: "/trending", icon: TrendingUp },
-];
-
-const browseItems = [
+  { title: "Most Popular", url: "/most-popular", icon: Star },
   { title: "A-Z List", url: "/az-list", icon: List },
   { title: "Movies", url: "/movies", icon: Film },
   { title: "TV Series", url: "/tv-series", icon: Tv },
-  { title: "Most Popular", url: "/most-popular", icon: Star },
   { title: "Subbed", url: "/subbed-anime", icon: Subtitles },
   { title: "Dubbed", url: "/dubbed-anime", icon: Mic2 },
+  { title: "Watch History", url: "/watch-history", icon: History },
 ];
 
-const settingsItems = [
+const bottomItems = [
   { title: "Settings", url: "/settings", icon: Settings },
-  { title: "Help Center", url: "/contact", icon: HelpCircle },
+  { title: "Help", url: "/contact", icon: HelpCircle },
 ];
 
 export function AppSidebar() {
-  const { open } = useSidebar();
+  const { open, toggleSidebar } = useSidebar();
   const isMobile = useIsMobile();
-  const [browseOpen, setBrowseOpen] = useState(true);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  
-  // On mobile, always show expanded. On desktop/tablet, respect the open state
   const showText = isMobile || open;
 
   return (
-    <Sidebar 
-      collapsible="icon" 
-      className="border-r border-border/5 bg-sidebar-background"
+    <Sidebar
+      collapsible="icon"
+      className="border-r border-[hsl(180_100%_50%/0.08)] sidebar-cyberpunk"
     >
-      <SidebarContent className="bg-sidebar-background">
-        {/* Logo Section */}
-        <div className="flex items-center gap-3 px-4 py-6 border-b border-border/5">
-          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary">
-            <Play className="h-5 w-5 text-primary-foreground fill-current" />
+      <SidebarContent className="sidebar-cyberpunk-bg overflow-hidden">
+        {/* Mobile Close Button */}
+        {isMobile && (
+          <button
+            onClick={toggleSidebar}
+            className="absolute top-3 left-3 z-50 flex items-center justify-center w-8 h-8 rounded-lg border border-[hsl(180_100%_50%/0.3)] bg-[hsl(180_100%_50%/0.05)] text-[hsl(180_100%_50%)] hover:bg-[hsl(180_100%_50%/0.15)] hover:shadow-[0_0_12px_hsl(180_100%_50%/0.3)] transition-all duration-200"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+
+        {/* Logo */}
+        <div className={cn(
+          "flex items-center gap-3 px-4 border-b border-[hsl(180_100%_50%/0.08)]",
+          isMobile ? "py-4 pt-14" : "py-5"
+        )}>
+          <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-gradient-to-br from-[hsl(180_100%_50%)] to-[hsl(300_100%_50%)] shadow-[0_0_15px_hsl(180_100%_50%/0.4)]">
+            <Play className="h-5 w-5 text-[hsl(240_30%_5%)] fill-current" />
           </div>
           {showText && (
-            <div className="flex flex-col">
-              <span className="text-base font-semibold text-sidebar-foreground">AnimixPlay</span>
-            </div>
+            <span className="text-base font-bold tracking-wide bg-gradient-to-r from-[hsl(180_100%_50%)] to-[hsl(300_100%_50%)] bg-clip-text text-transparent">
+              Helloflix
+            </span>
           )}
         </div>
 
-        {/* Search Bar */}
-        {showText && (
-          <div className="px-4 py-4">
-            <NavLink to="/search">
-              <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-sidebar-accent/40 hover:bg-sidebar-accent/60 transition-colors cursor-pointer group">
-                <Search className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">Search</span>
-                <span className="ml-auto text-xs text-muted-foreground">⌘ F</span>
-              </div>
-            </NavLink>
-          </div>
-        )}
-
-        {/* Main Menu */}
-        <SidebarGroup className="px-2 py-2">
+        {/* Main Nav */}
+        <SidebarGroup className="px-2 py-3 flex-1">
           {showText && (
             <div className="px-3 mb-2">
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50">
-                Main Menu
+              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-[hsl(180_100%_50%/0.4)]">
+                Navigate
               </span>
             </div>
           )}
@@ -92,20 +82,23 @@ export function AppSidebar() {
                     end={item.url === "/"}
                     className={({ isActive }) =>
                       cn(
-                        "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group",
+                        "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 group relative",
                         isActive
-                          ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                          ? "bg-[hsl(180_100%_50%/0.08)] text-[hsl(180_100%_50%)] shadow-[inset_0_0_12px_hsl(180_100%_50%/0.06)]"
+                          : "text-[hsl(210_15%_55%)] hover:text-[hsl(180_100%_50%/0.8)] hover:bg-[hsl(180_100%_50%/0.04)]"
                       )
                     }
                   >
                     {({ isActive }) => (
                       <>
+                        {isActive && (
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5 rounded-r bg-[hsl(180_100%_50%)] shadow-[0_0_8px_hsl(180_100%_50%/0.6)]" />
+                        )}
                         <item.icon className={cn(
-                          "h-5 w-5 md:h-6 md:w-6 lg:h-6 lg:w-6 transition-transform duration-200",
-                          isActive && "scale-110"
+                          "h-[18px] w-[18px] md:h-5 md:w-5 transition-all duration-200 flex-shrink-0",
+                          isActive && "drop-shadow-[0_0_6px_hsl(180_100%_50%/0.6)]"
                         )} />
-                        {showText && <span>{item.title}</span>}
+                        {showText && <span className="truncate">{item.title}</span>}
                       </>
                     )}
                   </NavLink>
@@ -115,127 +108,52 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Browse Section - Collapsible */}
-        <Collapsible
-          open={browseOpen}
-          onOpenChange={setBrowseOpen}
-          className="px-2 py-2"
-        >
+        {/* Bottom Section */}
+        <div className="px-2 pb-3 border-t border-[hsl(180_100%_50%/0.06)]">
           {showText && (
-            <div className="px-3 mb-2">
-              <CollapsibleTrigger className="flex items-center justify-between w-full group hover:text-sidebar-foreground transition-colors">
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50 group-hover:text-muted-foreground/70">
-                  Browse
-                </span>
-                <ChevronDown className={cn(
-                  "h-3 w-3 text-muted-foreground/50 transition-transform duration-200",
-                  browseOpen && "rotate-180"
-                )} />
-              </CollapsibleTrigger>
+            <div className="px-3 pt-3 mb-2">
+              <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-[hsl(180_100%_50%/0.4)]">
+                System
+              </span>
             </div>
           )}
-          <CollapsibleContent className="space-y-0.5">
-            <SidebarMenu className="space-y-0.5">
-              {browseItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <NavLink
-                    to={item.url}
-                    className={({ isActive }) =>
-                      cn(
-                        "flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] transition-all duration-200 group",
-                        isActive
-                          ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                          : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                      )
-                    }
-                  >
-                    {({ isActive }) => (
-                      <>
-                        <item.icon className={cn(
-                          "h-4 w-4 md:h-5 md:w-5 lg:h-5 lg:w-5 transition-all duration-200",
-                          isActive && "text-primary"
-                        )} />
-                        {showText && <span>{item.title}</span>}
-                      </>
-                    )}
-                  </NavLink>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </CollapsibleContent>
-        </Collapsible>
+          <SidebarMenu className="space-y-0.5">
+            {bottomItems.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <NavLink
+                  to={item.url}
+                  className={({ isActive }) =>
+                    cn(
+                      "flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] transition-all duration-200 group",
+                      isActive
+                        ? "bg-[hsl(180_100%_50%/0.08)] text-[hsl(180_100%_50%)]"
+                        : "text-[hsl(210_15%_55%)] hover:text-[hsl(180_100%_50%/0.8)] hover:bg-[hsl(180_100%_50%/0.04)]"
+                    )
+                  }
+                >
+                  <item.icon className="h-4 w-4 md:h-[18px] md:w-[18px] flex-shrink-0" />
+                  {showText && <span>{item.title}</span>}
+                </NavLink>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
 
-        {/* Settings Section - Collapsible */}
-        <Collapsible
-          open={settingsOpen}
-          onOpenChange={setSettingsOpen}
-          className="px-2 py-2 mt-auto"
-        >
-          {showText && (
-            <div className="px-3 mb-2">
-              <CollapsibleTrigger className="flex items-center justify-between w-full group hover:text-sidebar-foreground transition-colors">
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50 group-hover:text-muted-foreground/70">
-                  Settings
-                </span>
-                <ChevronDown className={cn(
-                  "h-3 w-3 text-muted-foreground/50 transition-transform duration-200",
-                  settingsOpen && "rotate-180"
-                )} />
-              </CollapsibleTrigger>
-            </div>
-          )}
-          <CollapsibleContent className="space-y-0.5">
-            <SidebarMenu className="space-y-0.5">
-              {settingsItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <NavLink
-                    to={item.url}
-                    className={({ isActive }) =>
-                      cn(
-                        "flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] transition-all duration-200 group",
-                        isActive
-                          ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                          : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                      )
-                    }
-                  >
-                    {({ isActive }) => (
-                      <>
-                        <item.icon className={cn(
-                          "h-4 w-4 md:h-5 md:w-5 lg:h-5 lg:w-5 transition-all duration-200",
-                          isActive && "text-primary"
-                        )} />
-                        {showText && <span>{item.title}</span>}
-                      </>
-                    )}
-                  </NavLink>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </CollapsibleContent>
-        </Collapsible>
-
-        {/* Profile Section */}
-        <div className="px-2 py-4 border-t border-border/5 mt-2">
+          {/* Profile */}
           <NavLink
             to="/profile"
             className={({ isActive }) =>
               cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group",
+                "flex items-center gap-3 px-3 py-2 mt-1 rounded-lg transition-all duration-200 group",
                 isActive
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                  ? "bg-[hsl(300_100%_50%/0.08)] text-[hsl(300_100%_60%)]"
+                  : "text-[hsl(210_15%_55%)] hover:text-[hsl(300_100%_60%)] hover:bg-[hsl(300_100%_50%/0.04)]"
               )
             }
           >
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 border border-primary/20">
-              <User className="h-4 w-4 text-primary" />
+            <div className="flex items-center justify-center w-7 h-7 rounded-full border border-[hsl(300_100%_50%/0.3)] bg-[hsl(300_100%_50%/0.06)]">
+              <User className="h-3.5 w-3.5" />
             </div>
-            {showText && (
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">Profile</p>
-              </div>
-            )}
+            {showText && <span className="text-[13px] font-medium">Profile</span>}
           </NavLink>
         </div>
       </SidebarContent>

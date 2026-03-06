@@ -72,7 +72,7 @@ const Auth = () => {
 
       toast({
         title: "Account created!",
-        description: "Welcome to AnimixPlay. You can now login.",
+        description: "Welcome to Helloflix. You can now login.",
       });
       setEmail("");
       setPassword("");
@@ -115,7 +115,7 @@ const Auth = () => {
             <Sparkles className="h-8 w-8 text-primary animate-pulse" />
           </div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
-            AnimixPlay
+            Helloflix
           </h1>
           <p className="text-muted-foreground text-sm">
             {isLogin ? "Welcome back! Sign in to continue" : "Create your account to start watching"}
