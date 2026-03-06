@@ -1,7 +1,6 @@
-import { useState, useEffect, useRef } from "react";
-import { Search, User, LogOut, Settings, Menu } from "lucide-react";
+import { useState, useEffect } from "react";
+import { User, LogOut, Settings, Search } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { SidebarTrigger } from "./ui/sidebar";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,28 +8,11 @@ import type { User as SupabaseUser } from "@supabase/supabase-js";
 import { Avatar, AvatarFallback } from "./ui/avatar";
 import { toast } from "sonner";
 import { ThemeToggle } from "./ThemeToggle";
-import { useSearchSuggestions } from "@/hooks/useSearchSuggestions";
-import SearchSuggestions from "./SearchSuggestions";
 
 const Header = () => {
   const [user, setUser] = useState<SupabaseUser | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
   const [showProfile, setShowProfile] = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const { suggestions, isLoading } = useSearchSuggestions(searchQuery);
-
-  // Close suggestions on outside click
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
-        setShowSuggestions(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -44,13 +26,6 @@ const Header = () => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-    }
-  };
-
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setShowProfile(false);
@@ -59,49 +34,36 @@ const Header = () => {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/20 bg-background/60 backdrop-blur-xl supports-[backdrop-filter]:bg-background/40">
+    <header className="sticky top-0 z-50 w-full border-b border-[hsl(180_100%_50%/0.06)] bg-[hsl(240_30%_5%/0.8)] backdrop-blur-xl">
       <div className="flex h-14 md:h-12 lg:h-16 items-center px-3 md:px-3 lg:px-4 gap-2 md:gap-2 lg:gap-4">
         {/* Sidebar Toggle */}
         <SidebarTrigger className="h-9 w-9 md:h-8 md:w-8 lg:h-10 lg:w-10 flex-shrink-0" />
         
-        {/* Animated Logo - visible on mobile and tablet */}
+        {/* Logo - visible on mobile and tablet */}
         <Link to="/" className="flex items-center lg:hidden flex-shrink-0">
-          <span className="font-bold text-sm md:text-xs lg:text-lg bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text text-transparent animate-pulse">
-            AnimixPlay
+          <span className="font-bold text-sm md:text-xs lg:text-lg bg-gradient-to-r from-[hsl(180_100%_50%)] to-[hsl(300_100%_50%)] bg-clip-text text-transparent">
+            Helloflix
           </span>
         </Link>
 
-        {/* Search Bar */}
-        <form onSubmit={(e) => { handleSearch(e); setShowSuggestions(false); }} className="flex-1 min-w-0">
-          <div className="relative" ref={searchRef}>
-            <Search className="absolute left-2 md:left-2.5 lg:left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 md:h-4 md:w-4 lg:h-5 lg:w-5 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search anime..."
-              className="pl-7 md:pl-8 lg:pl-10 bg-muted/50 h-8 md:h-8 lg:h-10 text-xs md:text-sm w-full"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setShowSuggestions(true);
-              }}
-              onFocus={() => setShowSuggestions(true)}
-            />
-            {showSuggestions && (
-              <SearchSuggestions
-                suggestions={suggestions}
-                isLoading={isLoading}
-                query={searchQuery}
-                onSelect={() => {
-                  setShowSuggestions(false);
-                  setSearchQuery("");
-                }}
-              />
-            )}
-          </div>
-        </form>
+        {/* Search button - desktop only, navigates to /search */}
+        <div className="flex-1 hidden lg:flex justify-center">
+          <Button
+            variant="ghost"
+            className="w-full max-w-md h-10 px-4 justify-start gap-2 text-muted-foreground bg-[hsl(180_100%_50%/0.03)] border border-[hsl(180_100%_50%/0.08)] rounded-xl hover:border-[hsl(180_100%_50%/0.15)] hover:bg-[hsl(180_100%_50%/0.06)]"
+            onClick={() => navigate("/search")}
+          >
+            <Search className="h-4 w-4" />
+            <span className="text-sm">Search anime...</span>
+            <span className="ml-auto text-xs text-muted-foreground/50">⌘K</span>
+          </Button>
+        </div>
 
-        {/* Action Buttons - Right aligned and compact */}
-        <div className="flex items-center gap-1 md:gap-1 lg:gap-2 flex-shrink-0 ml-auto relative">
+        {/* Spacer on mobile */}
+        <div className="flex-1 lg:hidden" />
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-1 md:gap-1 lg:gap-2 flex-shrink-0 relative">
           <ThemeToggle />
           {user ? (
             <>
@@ -112,20 +74,19 @@ const Header = () => {
                 onClick={() => setShowProfile(!showProfile)}
               >
                 <Avatar className="h-7 w-7 md:h-7 md:w-7 lg:h-8 lg:w-8">
-                  <AvatarFallback className="bg-primary text-primary-foreground text-xs md:text-xs lg:text-sm">
+                  <AvatarFallback className="bg-gradient-to-br from-[hsl(180_100%_50%)] to-[hsl(300_100%_50%)] text-[hsl(240_30%_5%)] text-xs md:text-xs lg:text-sm font-bold">
                     {user.email?.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <span className="hidden lg:inline ml-2 text-sm">Profile</span>
               </Button>
               
-              {/* Animated Profile Dropdown */}
               {showProfile && (
-                <div className="absolute right-0 top-full mt-2 w-64 md:w-72 bg-card border border-border rounded-lg shadow-xl animate-slide-up overflow-hidden z-50">
-                  <div className="p-4 bg-gradient-to-br from-primary/10 to-primary/5 border-b border-border">
+                <div className="absolute right-0 top-full mt-2 w-64 md:w-72 bg-[hsl(240_30%_8%)] border border-[hsl(180_100%_50%/0.12)] rounded-xl shadow-[0_8px_32px_hsl(0_0%_0%/0.5),0_0_16px_hsl(180_100%_50%/0.1)] animate-slide-up overflow-hidden z-50">
+                  <div className="p-4 bg-gradient-to-br from-[hsl(180_100%_50%/0.08)] to-[hsl(300_100%_50%/0.05)] border-b border-[hsl(180_100%_50%/0.1)]">
                     <div className="flex items-center space-x-3">
-                      <Avatar className="h-12 w-12">
-                        <AvatarFallback className="bg-primary text-primary-foreground">
+                      <Avatar className="h-12 w-12 border border-[hsl(180_100%_50%/0.2)]">
+                        <AvatarFallback className="bg-gradient-to-br from-[hsl(180_100%_50%)] to-[hsl(300_100%_50%)] text-[hsl(240_30%_5%)] font-bold">
                           {user.email?.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
@@ -140,29 +101,23 @@ const Header = () => {
                   <div className="p-2">
                     <Button
                       variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => {
-                        setShowProfile(false);
-                        navigate("/profile");
-                      }}
+                      className="w-full justify-start hover:bg-[hsl(180_100%_50%/0.06)] hover:text-[hsl(180_100%_50%)]"
+                      onClick={() => { setShowProfile(false); navigate("/profile"); }}
                     >
                       <User className="h-4 w-4 mr-2" />
                       View Profile
                     </Button>
                     <Button
                       variant="ghost"
-                      className="w-full justify-start"
-                      onClick={() => {
-                        setShowProfile(false);
-                        navigate("/settings");
-                      }}
+                      className="w-full justify-start hover:bg-[hsl(180_100%_50%/0.06)] hover:text-[hsl(180_100%_50%)]"
+                      onClick={() => { setShowProfile(false); navigate("/settings"); }}
                     >
                       <Settings className="h-4 w-4 mr-2" />
                       Settings
                     </Button>
                     <Button
                       variant="ghost"
-                      className="w-full justify-start text-destructive hover:text-destructive"
+                      className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
                       onClick={handleLogout}
                     >
                       <LogOut className="h-4 w-4 mr-2" />
@@ -176,7 +131,7 @@ const Header = () => {
             <Button 
               variant="default" 
               size="sm" 
-              className="h-8 md:h-8 lg:h-10 px-3 md:px-3 lg:px-4 text-xs md:text-xs lg:text-sm font-medium"
+              className="h-8 md:h-8 lg:h-10 px-3 md:px-3 lg:px-4 text-xs md:text-xs lg:text-sm font-medium bg-gradient-to-r from-[hsl(180_100%_50%)] to-[hsl(300_100%_50%)] text-[hsl(240_30%_5%)] hover:opacity-90 border-0"
               asChild
             >
               <Link to="/auth">Login</Link>

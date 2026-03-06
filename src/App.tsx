@@ -47,7 +47,7 @@ const App = () => (
             <Route path="/contact" element={<Contact />} />
             <Route path="/profile" element={<Profile />} />
           <Route path="/settings" element={<Settings />} />
-          <Route path="/trending" element={<Trending />} />
+          
           <Route path="/auth" element={<Auth />} />
           <Route path="/pt-watch/:uuid" element={<PeerTubeWatch />} />
           <Route path="*" element={<NotFound />} />
