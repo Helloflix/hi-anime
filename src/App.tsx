@@ -19,7 +19,7 @@ import SearchPage from "./pages/SearchPage";
 import Contact from "./pages/Contact";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
-import Trending from "./pages/Trending";
+
 import Auth from "./pages/Auth";
 import PeerTubeWatch from "./pages/PeerTubeWatch";
 
