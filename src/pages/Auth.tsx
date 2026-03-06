@@ -72,7 +72,7 @@ const Auth = () => {
 
       toast({
         title: "Account created!",
-        description: "Welcome to AnimixPlay. You can now login.",
+        description: "Welcome to Helloflix. You can now login.",
       });
       setEmail("");
       setPassword("");
